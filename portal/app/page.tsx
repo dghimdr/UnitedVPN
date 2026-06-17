@@ -100,8 +100,16 @@ export default async function HomePage() {
       </section>
 
       <footer className="landing-footer">
-        <span>UnitedVPN</span>
-        <span>Private access for approved members.</span>
+        <div className="footer-copy">
+          <span>Exclusive invites only.</span>
+          <span>Site built by David Gim.</span>
+          <span>Designed by David Gim.</span>
+        </div>
+        <nav className="footer-links" aria-label="Footer">
+          <Link href="/privacy">Privacy Policy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/contact">Contact</Link>
+        </nav>
       </footer>
     </main>
   );
