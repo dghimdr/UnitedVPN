@@ -30,7 +30,7 @@ export default function LoginPage({
           <button type="submit">Log in</button>
         </form>
         <p>
-          Need access? <Link href="/auth/signup">Request an account</Link>
+          Need access? <Link href="/signup">Request an account</Link>
         </p>
       </section>
     </main>

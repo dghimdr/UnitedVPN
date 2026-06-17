@@ -35,7 +35,7 @@ export default function SignUpPage({
           <button type="submit">Create account</button>
         </form>
         <p>
-          Already approved? <Link href="/auth/login">Log in</Link>
+          Already approved? <Link href="/login">Log in</Link>
         </p>
       </section>
     </main>

@@ -36,8 +36,8 @@ export default async function RootLayout({
               </>
             ) : (
               <>
-                <Link href="/auth/login">Log in</Link>
-                <Link className="button" href="/auth/signup">
+                <Link href="/login">Log in</Link>
+                <Link className="button" href="/signup">
                   Sign up
                 </Link>
               </>
