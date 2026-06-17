@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/supabase/types";
 
@@ -75,7 +76,8 @@ export async function requireAdminApi(): Promise<RequireAdminApiResult> {
     };
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const admin = createAdminClient();
+  const { data: profile, error: profileError } = await admin
     .from("profiles")
     .select("*")
     .eq("id", user.id)
