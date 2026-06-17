@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 const accessSteps = [
   {
     title: "Request",
-    text: "Create an account with your email and a password."
+    text: "Create an account and request private network access."
   },
   {
     title: "Review",
@@ -13,7 +13,7 @@ const accessSteps = [
   },
   {
     title: "Connect",
-    text: "Approved users receive one WireGuard device profile."
+    text: "Approved users receive one WireGuard profile for one device."
   }
 ];
 
@@ -28,11 +28,11 @@ const devices = [
   },
   {
     title: "Mac",
-    text: "Config download support is planned for desktop setup."
+    text: "WireGuard config download support is planned for desktop setup."
   },
   {
     title: "Windows",
-    text: "Config download support is planned for desktop setup."
+    text: "WireGuard config download support is planned for desktop setup."
   }
 ];
 
@@ -49,12 +49,14 @@ export default async function HomePage() {
   return (
     <main className="landing">
       <section className="landing-hero">
+        <div className="hero-stripes" aria-hidden="true" />
         <div className="hero-copy">
-          <p className="eyebrow">UnitedVPN private portal</p>
-          <h1>Private access. Simple setup. Built for people I trust.</h1>
+          <p className="eyebrow">Private WireGuard portal</p>
+          <h1>UnitedVPN</h1>
+          <p className="hero-kicker">Private access for trusted people.</p>
           <p className="hero-subtitle">
-            A focused WireGuard access portal for trusted users, with manual
-            approval before any VPN profile is created.
+            Secure, simple VPN access through a private network built for
+            approved users only.
           </p>
           <div className="hero-actions" aria-label="UnitedVPN account actions">
             <Link className="button landing-primary" href="/signup">
@@ -64,11 +66,16 @@ export default async function HomePage() {
               Sign In
             </Link>
           </div>
+          <div className="hero-meta" aria-label="Access controls">
+            <span>Invite/request only</span>
+            <span>Admin approved</span>
+            <span>One device</span>
+          </div>
         </div>
         <div className="signal-card" aria-label="UnitedVPN access status">
           <div className="signal-topline">
             <span className="signal-dot" />
-            Invite only
+            Private network
           </div>
           <div className="signal-grid">
             <span />
@@ -80,7 +87,7 @@ export default async function HomePage() {
           </div>
           <div className="signal-footer">
             <span>Manual approval</span>
-            <strong>1 device</strong>
+            <strong>Approved users only</strong>
           </div>
         </div>
       </section>
@@ -92,8 +99,8 @@ export default async function HomePage() {
         </div>
         <p>
           UnitedVPN is a private WireGuard VPN for a small approved group. It is
-          built for controlled access, simple setup, and a clear separation
-          between request, approval, and connection.
+          built for controlled access, simple setup, and clear separation
+          between requesting access, approval, and connection.
         </p>
       </section>
 

@@ -1,19 +1,22 @@
 :root {
   color-scheme: dark;
-  --bg: #060b13;
+  --bg: #050505;
   --panel: #ffffff;
   --text: #15171a;
   --muted: #626a73;
   --line: #d9dee5;
-  --accent: #4da3ff;
-  --accent-dark: #1f7fe5;
+  --accent: #d71920;
+  --accent-dark: #a90f17;
   --danger: #b42318;
   --warning: #a15c07;
   --ok: #067647;
-  --landing-text: #f7fbff;
-  --landing-muted: #9fb0c3;
-  --landing-line: rgba(148, 174, 202, 0.22);
-  --landing-panel: rgba(10, 19, 33, 0.82);
+  --landing-text: #ffffff;
+  --landing-muted: #b9b9b9;
+  --landing-line: rgba(215, 25, 32, 0.34);
+  --landing-panel: rgba(20, 20, 20, 0.88);
+  --landing-red: #d71920;
+  --landing-red-dark: #7f0b11;
+  --landing-gold: #d8a63b;
 }
 
 * {
@@ -23,8 +26,9 @@
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 50% -20%, rgba(77, 163, 255, 0.2), transparent 34rem),
-    linear-gradient(180deg, #06101e 0%, var(--bg) 36rem);
+    radial-gradient(circle at 18% 0%, rgba(215, 25, 32, 0.25), transparent 30rem),
+    radial-gradient(circle at 82% 10%, rgba(216, 166, 59, 0.08), transparent 24rem),
+    linear-gradient(180deg, #090909 0%, var(--bg) 38rem);
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -50,8 +54,8 @@ main {
   justify-content: space-between;
   gap: 16px;
   padding: 16px;
-  border-bottom: 1px solid var(--landing-line);
-  background: rgba(6, 11, 19, 0.86);
+  border-bottom: 1px solid rgba(215, 25, 32, 0.26);
+  background: rgba(5, 5, 5, 0.9);
   backdrop-filter: blur(18px);
 }
 
@@ -230,6 +234,8 @@ th {
 }
 
 .landing-hero {
+  position: relative;
+  overflow: hidden;
   min-height: calc(100vh - 180px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
@@ -238,15 +244,36 @@ th {
   padding: 36px 0 72px;
 }
 
+.hero-stripes {
+  position: absolute;
+  inset: 12px -80px auto auto;
+  width: min(48vw, 620px);
+  height: 72%;
+  transform: skewX(-18deg);
+  background:
+    linear-gradient(90deg, transparent 0 14%, rgba(215, 25, 32, 0.3) 14% 18%, transparent 18% 34%, rgba(255, 255, 255, 0.06) 34% 36%, transparent 36% 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(215, 25, 32, 0.12) 0 16px,
+      transparent 16px 42px
+    );
+  mask-image: linear-gradient(90deg, transparent, #000 24%, #000 74%, transparent);
+  opacity: 0.9;
+  pointer-events: none;
+  animation: stripeDrift 16s linear infinite;
+}
+
 .hero-copy {
+  position: relative;
   display: grid;
-  gap: 22px;
+  gap: 18px;
   max-width: 760px;
+  z-index: 1;
 }
 
 .eyebrow {
   margin-bottom: 0;
-  color: #86c2ff;
+  color: var(--landing-gold);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
@@ -263,7 +290,8 @@ th {
 .landing h1 {
   max-width: 840px;
   margin-bottom: 0;
-  font-size: clamp(48px, 8vw, 92px);
+  font-size: clamp(64px, 10vw, 132px);
+  text-transform: uppercase;
 }
 
 .landing h2 {
@@ -274,6 +302,15 @@ th {
 .landing h3 {
   margin-bottom: 0;
   font-size: 20px;
+}
+
+.hero-kicker {
+  max-width: 740px;
+  margin-bottom: 0;
+  color: var(--landing-text);
+  font-size: clamp(30px, 5vw, 62px);
+  font-weight: 800;
+  line-height: 1.04;
 }
 
 .hero-subtitle {
@@ -289,23 +326,43 @@ th {
 }
 
 .button.landing-primary {
-  background: #f7fbff;
-  color: #06101e;
-  box-shadow: 0 18px 44px rgba(77, 163, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--landing-red);
+  color: #ffffff;
+  box-shadow: 0 18px 44px rgba(215, 25, 32, 0.34);
 }
 
 .button.landing-primary:hover {
-  background: #dceeff;
+  background: #f0262e;
 }
 
 .button.landing-secondary {
-  border: 1px solid var(--landing-line);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--landing-text);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: #ffffff;
+  color: #050505;
 }
 
 .button.landing-secondary:hover {
-  background: rgba(77, 163, 255, 0.16);
+  background: #050505;
+  color: var(--landing-text);
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.hero-meta span {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-left-color: var(--landing-red);
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: #f3f3f3;
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .signal-card,
@@ -314,7 +371,10 @@ th {
 .landing-cta {
   border: 1px solid var(--landing-line);
   background: var(--landing-panel);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 24px 70px rgba(0, 0, 0, 0.42),
+    0 0 34px rgba(215, 25, 32, 0.08);
 }
 
 .signal-card {
@@ -322,6 +382,7 @@ th {
   overflow: hidden;
   border-radius: 8px;
   padding: 22px;
+  z-index: 1;
 }
 
 .signal-card::before {
@@ -329,13 +390,17 @@ th {
   inset: -1px;
   content: "";
   background:
-    linear-gradient(90deg, transparent, rgba(77, 163, 255, 0.2), transparent),
+    linear-gradient(90deg, transparent, rgba(215, 25, 32, 0.26), transparent),
     repeating-linear-gradient(
       135deg,
       transparent 0,
-      transparent 18px,
-      rgba(255, 255, 255, 0.04) 19px,
-      rgba(255, 255, 255, 0.04) 20px
+      transparent 16px,
+      rgba(255, 255, 255, 0.055) 17px,
+      rgba(255, 255, 255, 0.055) 19px,
+      transparent 20px,
+      transparent 38px,
+      rgba(215, 25, 32, 0.16) 39px,
+      rgba(215, 25, 32, 0.16) 42px
     );
   pointer-events: none;
 }
@@ -358,8 +423,8 @@ th {
   width: 9px;
   height: 9px;
   border-radius: 999px;
-  background: #4da3ff;
-  box-shadow: 0 0 22px rgba(77, 163, 255, 0.9);
+  background: var(--landing-red);
+  box-shadow: 0 0 22px rgba(215, 25, 32, 0.95);
 }
 
 .signal-grid {
@@ -371,14 +436,18 @@ th {
 
 .signal-grid span {
   min-height: 74px;
-  border: 1px solid rgba(148, 174, 202, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent),
+    rgba(255, 255, 255, 0.035);
 }
 
 .signal-grid span:nth-child(2),
 .signal-grid span:nth-child(5) {
-  background: rgba(77, 163, 255, 0.16);
+  background:
+    linear-gradient(135deg, rgba(215, 25, 32, 0.58), rgba(127, 11, 17, 0.24)),
+    rgba(215, 25, 32, 0.18);
 }
 
 .signal-footer strong {
@@ -387,7 +456,7 @@ th {
 
 .landing-section {
   padding: 68px 0;
-  border-top: 1px solid var(--landing-line);
+  border-top: 1px solid rgba(215, 25, 32, 0.22);
 }
 
 .split-section {
@@ -424,11 +493,42 @@ th {
 
 .landing-card,
 .device-card {
+  position: relative;
+  overflow: hidden;
   display: grid;
   gap: 14px;
   min-height: 190px;
   border-radius: 8px;
   padding: 22px;
+}
+
+.landing-card::before,
+.device-card::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  content: "";
+  background: linear-gradient(90deg, var(--landing-red), transparent 78%);
+}
+
+.landing-card::after,
+.device-card::after {
+  position: absolute;
+  right: -36px;
+  bottom: -52px;
+  width: 150px;
+  height: 160px;
+  content: "";
+  transform: skewX(-22deg);
+  background: rgba(215, 25, 32, 0.12);
+  pointer-events: none;
+}
+
+.landing-card > *,
+.device-card > * {
+  position: relative;
 }
 
 .landing-card p,
@@ -437,7 +537,7 @@ th {
 }
 
 .step-number {
-  color: #86c2ff;
+  color: var(--landing-red);
   font-size: 13px;
   font-weight: 700;
 }
@@ -447,6 +547,8 @@ th {
 }
 
 .landing-cta {
+  position: relative;
+  overflow: hidden;
   display: grid;
   justify-items: center;
   gap: 16px;
@@ -456,6 +558,25 @@ th {
   text-align: center;
 }
 
+.landing-cta::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(110deg, rgba(215, 25, 32, 0.22), transparent 36%),
+    repeating-linear-gradient(
+      120deg,
+      transparent 0 18px,
+      rgba(255, 255, 255, 0.035) 18px 20px,
+      transparent 20px 44px
+    );
+  pointer-events: none;
+}
+
+.landing-cta > * {
+  position: relative;
+}
+
 .landing-cta p {
   max-width: 560px;
   margin-bottom: 0;
@@ -463,6 +584,22 @@ th {
 
 .landing-cta .hero-actions {
   justify-content: center;
+}
+
+@keyframes stripeDrift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+
+  to {
+    background-position: 0 0, 84px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stripes {
+    animation: none;
+  }
 }
 
 @media (max-width: 720px) {
@@ -509,7 +646,11 @@ th {
   }
 
   .landing h1 {
-    font-size: 38px;
+    font-size: 54px;
+  }
+
+  .hero-kicker {
+    font-size: 34px;
   }
 
   .hero-subtitle {
@@ -519,6 +660,11 @@ th {
   .hero-actions,
   .hero-actions .button {
     width: 100%;
+  }
+
+  .hero-meta span {
+    flex: 1 1 calc(50% - 10px);
+    text-align: center;
   }
 
   .split-section,
