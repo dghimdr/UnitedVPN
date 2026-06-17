@@ -113,17 +113,67 @@ p {
 label {
   display: grid;
   gap: 6px;
-  color: var(--muted);
+  color: #3f4752;
   font-size: 14px;
+  font-weight: 700;
 }
 
-input {
+input,
+textarea,
+select {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 12px;
+  color: #111111;
   font: inherit;
-  background: white;
+  background: #ffffff;
+  caret-color: var(--accent);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+select {
+  appearance: auto;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 3px rgba(218, 41, 28, 0.14),
+    0 1px 2px rgba(17, 17, 17, 0.08);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  border-color: var(--line);
+  -webkit-text-fill-color: #111111;
+  caret-color: var(--accent);
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  transition: background-color 9999s ease-out;
 }
 
 button,
@@ -156,6 +206,12 @@ button.secondary,
 
 button.danger {
   background: var(--danger);
+}
+
+button:disabled,
+.button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .status {
@@ -219,6 +275,35 @@ th {
 .error {
   border-left-color: var(--danger);
   background: #fff1f0;
+}
+
+.detail-list {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.detail-list div {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.32fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-list div:last-child {
+  border-bottom: 0;
+}
+
+.detail-list strong {
+  color: var(--text);
+}
+
+.detail-list span {
+  min-width: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .landing {
@@ -1061,6 +1146,11 @@ th {
 
   .grid.two {
     grid-template-columns: 1fr;
+  }
+
+  .detail-list div {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
   .topbar {

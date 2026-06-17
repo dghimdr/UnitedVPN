@@ -1,11 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
+import { getSupabaseEnvStatus } from "@/lib/env";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const supabaseEnvStatus = getSupabaseEnvStatus();
+
+  if (!supabaseEnvStatus.configured) {
+    console.error("UnitedVPN middleware auth refresh skipped", {
+      message: supabaseEnvStatus.reason
+    });
+    return response;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

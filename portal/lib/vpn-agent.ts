@@ -2,11 +2,68 @@ import crypto from "node:crypto";
 import { requiredEnv } from "@/lib/env";
 
 type AgentMethod = "GET" | "POST";
+type VpnAgentStatus = {
+  configured: boolean;
+  reason: string | null;
+};
+
+function isPlaceholder(value: string) {
+  const normalized = value.trim().toLowerCase();
+
+  return (
+    normalized.length === 0 ||
+    normalized.includes("example.com") ||
+    normalized.includes("placeholder") ||
+    normalized.includes("changeme") ||
+    normalized.includes("replace-me")
+  );
+}
+
+export function getVpnAgentStatus(): VpnAgentStatus {
+  const baseUrl = process.env.VPS_AGENT_BASE_URL;
+  const secret = process.env.VPS_AGENT_SHARED_SECRET;
+
+  if (!baseUrl) {
+    return {
+      configured: false,
+      reason: "VPS_AGENT_BASE_URL is not configured."
+    };
+  }
+
+  if (isPlaceholder(baseUrl)) {
+    return {
+      configured: false,
+      reason: "VPS_AGENT_BASE_URL is still set to a placeholder value."
+    };
+  }
+
+  if (!secret) {
+    return {
+      configured: false,
+      reason: "VPS_AGENT_SHARED_SECRET is not configured."
+    };
+  }
+
+  if (isPlaceholder(secret)) {
+    return {
+      configured: false,
+      reason: "VPS_AGENT_SHARED_SECRET is still set to a placeholder value."
+    };
+  }
+
+  return { configured: true, reason: null };
+}
 
 export async function callVpnAgent<T>(
   path: string,
   options: { method?: AgentMethod; body?: unknown } = {}
 ): Promise<T> {
+  const status = getVpnAgentStatus();
+
+  if (!status.configured) {
+    throw new Error(status.reason ?? "VPS agent is not configured.");
+  }
+
   const method = options.method ?? "GET";
   const body = options.body ? JSON.stringify(options.body) : "";
   const timestamp = Math.floor(Date.now() / 1000).toString();

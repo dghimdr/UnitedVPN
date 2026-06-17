@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { callVpnAgent } from "@/lib/vpn-agent";
+import { callVpnAgent, getVpnAgentStatus } from "@/lib/vpn-agent";
 import { vpnUsernameFromUserId } from "@/lib/usernames";
 
 export async function POST(request: Request) {
   await requireAdmin();
+  const vpnAgentStatus = getVpnAgentStatus();
+
+  if (!vpnAgentStatus.configured) {
+    return NextResponse.json(
+      { error: vpnAgentStatus.reason ?? "VPS agent is not configured" },
+      { status: 503 }
+    );
+  }
+
   const formData = await request.formData();
   const userId = String(formData.get("userId") ?? "");
   const admin = createAdminClient();
@@ -38,10 +47,17 @@ export async function POST(request: Request) {
 
   const vpnUsername = profile.vpn_username ?? vpnUsernameFromUserId(profile.id);
 
-  await callVpnAgent("/v1/provision", {
-    method: "POST",
-    body: { username: vpnUsername }
-  });
+  try {
+    await callVpnAgent("/v1/provision", {
+      method: "POST",
+      body: { username: vpnUsername }
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "VPN provisioning failed";
+    console.error("UnitedVPN approve provisioning failed", { message });
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 
   const { error: updateError } = await admin
     .from("profiles")
@@ -58,7 +74,14 @@ export async function POST(request: Request) {
     await callVpnAgent("/v1/revoke", {
       method: "POST",
       body: { username: vpnUsername }
-    }).catch(() => undefined);
+    }).catch((revokeError) => {
+      console.error("UnitedVPN approve rollback revoke failed", {
+        message:
+          revokeError instanceof Error
+            ? revokeError.message
+            : "Unknown revoke rollback error"
+      });
+    });
 
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }

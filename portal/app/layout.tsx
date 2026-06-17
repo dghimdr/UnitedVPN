@@ -1,6 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import { signOut } from "@/lib/actions";
+import { getSupabaseEnvStatus } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -11,10 +12,27 @@ export const metadata = {
 export default async function RootLayout({
   children
 }: Readonly<{ children: React.ReactNode }>) {
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const supabaseEnvStatus = getSupabaseEnvStatus();
+  let user = null;
+
+  if (supabaseEnvStatus.configured) {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user: currentUser }
+      } = await supabase.auth.getUser();
+      user = currentUser;
+    } catch (error) {
+      console.error("UnitedVPN layout auth lookup failed", {
+        message:
+          error instanceof Error ? error.message : "Unknown auth lookup error"
+      });
+    }
+  } else {
+    console.error("UnitedVPN layout auth lookup skipped", {
+      message: supabaseEnvStatus.reason
+    });
+  }
 
   return (
     <html lang="en">
