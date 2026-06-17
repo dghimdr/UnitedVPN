@@ -185,12 +185,12 @@ export default async function DashboardPage() {
             <section className="stack">
               <h2>Phone setup</h2>
               <p>Scan this QR code in the WireGuard iPhone or Android app.</p>
-              <img className="qr" src="/api/user/qr" alt="WireGuard QR code" />
+              <img className="qr" src="/api/vpn/qr" alt="WireGuard QR code" />
             </section>
             <section className="stack">
               <h2>Computer setup</h2>
               <p>Download the WireGuard config for Mac or Windows.</p>
-              <a className="button" href="/api/user/config">
+              <a className="button" href="/api/vpn/config">
                 Download .conf
               </a>
             </section>
