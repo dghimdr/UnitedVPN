@@ -2,39 +2,22 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-const accessSteps = [
+const pillars = [
   {
-    title: "Request",
-    text: "Create an account and request private network access."
+    title: "Private",
+    text: "A closed network for known members, not a public VPN service."
   },
   {
-    title: "Review",
-    text: "Access stays pending until an admin approves the request."
+    title: "Approved",
+    text: "Every account is reviewed before access is granted."
   },
   {
-    title: "Connect",
-    text: "Approved users receive one WireGuard profile for one device."
+    title: "Secure",
+    text: "WireGuard access for trusted devices with admin-controlled status."
   }
 ];
 
-const devices = [
-  {
-    title: "iPhone",
-    text: "Scan the QR code in the WireGuard app."
-  },
-  {
-    title: "Android",
-    text: "Scan the QR code in the WireGuard app."
-  },
-  {
-    title: "Mac",
-    text: "WireGuard config download support is planned for desktop setup."
-  },
-  {
-    title: "Windows",
-    text: "WireGuard config download support is planned for desktop setup."
-  }
-];
+const accessSteps = ["Request Access", "Review", "Approval", "Connect"];
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -48,121 +31,78 @@ export default async function HomePage() {
 
   return (
     <main className="landing">
-      <section className="landing-hero">
-        <div className="hero-stripes" aria-hidden="true" />
+      <section className="club-hero">
+        <div className="motion-line" aria-hidden="true" />
+        <div className="brand-mark" aria-label="UnitedVPN">
+          <span>UV</span>
+        </div>
         <div className="hero-copy">
-          <p className="eyebrow">Private WireGuard portal</p>
+          <p className="eyebrow">Private membership network</p>
           <h1>UnitedVPN</h1>
-          <p className="hero-kicker">Private access for trusted people.</p>
+          <p className="hero-kicker">
+            Private internet access. By invitation only.
+          </p>
           <p className="hero-subtitle">
-            Secure, simple VPN access through a private network built for
-            approved users only.
+            A private network built for approved members, trusted devices, and
+            secure access anywhere.
           </p>
           <div className="hero-actions" aria-label="UnitedVPN account actions">
             <Link className="button landing-primary" href="/signup">
               Request Access
             </Link>
             <Link className="button landing-secondary" href="/login">
-              Sign In
+              Member Sign In
             </Link>
           </div>
-          <div className="hero-meta" aria-label="Access controls">
-            <span>Invite/request only</span>
-            <span>Admin approved</span>
-            <span>One device</span>
-          </div>
-        </div>
-        <div className="signal-card" aria-label="UnitedVPN access status">
-          <div className="signal-topline">
-            <span className="signal-dot" />
-            Private network
-          </div>
-          <div className="signal-grid">
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className="signal-footer">
-            <span>Manual approval</span>
-            <strong>Approved users only</strong>
-          </div>
         </div>
       </section>
 
-      <section className="landing-section split-section">
-        <div>
-          <p className="eyebrow">What it is</p>
-          <h2>Private infrastructure for trusted access.</h2>
+      <section className="landing-section editorial-section">
+        <div className="section-heading">
+          <p className="eyebrow">Why UnitedVPN</p>
+          <h2>Access is limited by design.</h2>
         </div>
-        <p>
-          UnitedVPN is a private WireGuard VPN for a small approved group. It is
-          built for controlled access, simple setup, and clear separation
-          between requesting access, approval, and connection.
-        </p>
+        <div className="pillar-list">
+          {pillars.map((pillar) => (
+            <article className="pillar-item" key={pillar.title}>
+              <h3>{pillar.title}</h3>
+              <p>{pillar.text}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
-      <section className="landing-section">
+      <section className="landing-section access-section">
         <div className="section-heading">
           <p className="eyebrow">How access works</p>
-          <h2>Requests stay gated until approved.</h2>
+          <h2>Simple steps. No automatic entry.</h2>
         </div>
-        <div className="landing-grid three">
+        <ol className="access-track">
           {accessSteps.map((step, index) => (
-            <article className="landing-card" key={step.title}>
-              <span className="step-number">{String(index + 1).padStart(2, "0")}</span>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-            </article>
+            <li key={step}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {step}
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
 
-      <section className="landing-section">
-        <div className="section-heading">
-          <p className="eyebrow">Supported devices</p>
-          <h2>One approved profile per user.</h2>
-        </div>
-        <div className="landing-grid four">
-          {devices.map((device) => (
-            <article className="device-card" key={device.title}>
-              <h3>{device.title}</h3>
-              <p>{device.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="landing-section split-section security-note">
+      <section className="landing-section membership-section">
         <div>
-          <p className="eyebrow">Privacy and security</p>
-          <h2>No public access. No automatic approval.</h2>
+          <p className="eyebrow">Membership</p>
+          <h2>Private by default.</h2>
         </div>
-        <p>
-          Requests are reviewed before access is granted. The portal does not
-          sell VPN service, process payments, or publish server details. Access
-          can be revoked by an admin when needed.
-        </p>
+        <ul className="membership-list">
+          <li>Invite only.</li>
+          <li>One device per approved member.</li>
+          <li>Access can be revoked at any time.</li>
+        </ul>
       </section>
 
-      <section className="landing-cta">
-        <p className="eyebrow">Request access</p>
-        <h2>Start with an account request.</h2>
-        <p>
-          If approved, your portal dashboard will show the setup option for your
-          device.
-        </p>
-        <div className="hero-actions">
-          <Link className="button landing-primary" href="/signup">
-            Request Access
-          </Link>
-          <Link className="button landing-secondary" href="/login">
-            Sign In
-          </Link>
-        </div>
-      </section>
+      <footer className="landing-footer">
+        <span>UnitedVPN</span>
+        <span>Private access for approved members.</span>
+      </footer>
     </main>
   );
 }
