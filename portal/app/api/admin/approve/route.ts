@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { callVpnAgent, getVpnAgentStatus } from "@/lib/vpn-agent";
 import { vpnUsernameFromUserId } from "@/lib/usernames";
 
 export async function POST(request: Request) {
-  await requireAdmin();
+  const adminCheck = await requireAdminApi();
+  if (!adminCheck.ok) {
+    return adminCheck.response;
+  }
+
   const vpnAgentStatus = getVpnAgentStatus();
   const formData = await request.formData();
   const userId = String(formData.get("userId") ?? "");
