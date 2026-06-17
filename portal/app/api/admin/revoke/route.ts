@@ -6,14 +6,6 @@ import { callVpnAgent, getVpnAgentStatus } from "@/lib/vpn-agent";
 export async function POST(request: Request) {
   await requireAdmin();
   const vpnAgentStatus = getVpnAgentStatus();
-
-  if (!vpnAgentStatus.configured) {
-    return NextResponse.json(
-      { error: vpnAgentStatus.reason ?? "VPS agent is not configured" },
-      { status: 503 }
-    );
-  }
-
   const formData = await request.formData();
   const userId = String(formData.get("userId") ?? "");
   const admin = createAdminClient();
@@ -28,7 +20,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  if (profile.vpn_username) {
+  if (profile.vpn_username && vpnAgentStatus.configured) {
     try {
       await callVpnAgent("/v1/revoke", {
         method: "POST",
@@ -42,16 +34,24 @@ export async function POST(request: Request) {
     }
   }
 
+  const revokedAt = new Date().toISOString();
   const { error: updateError } = await admin
     .from("profiles")
     .update({
       status: "revoked",
-      revoked_at: new Date().toISOString()
+      revoked_at: revokedAt
     })
     .eq("id", profile.id);
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  if (!vpnAgentStatus.configured) {
+    return NextResponse.redirect(
+      new URL("/admin?message=revoked-db-only", request.url),
+      303
+    );
   }
 
   return NextResponse.redirect(new URL("/admin", request.url), 303);

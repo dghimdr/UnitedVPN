@@ -7,7 +7,20 @@ import { getVpnAgentStatus } from "@/lib/vpn-agent";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
+type AdminMessage = "approved-db-only" | "revoked-db-only";
+
+const adminMessages: Record<AdminMessage, string> = {
+  "approved-db-only":
+    "Approved in portal. VPN profile not provisioned because VPS agent is not connected.",
+  "revoked-db-only":
+    "Revoked in portal. VPN removal was skipped because VPS agent is not connected."
+};
+
+export default async function AdminPage({
+  searchParams
+}: {
+  searchParams?: { message?: string };
+}) {
   const supabaseEnvStatus = getSupabaseEnvStatus();
 
   if (!supabaseEnvStatus.configured) {
@@ -93,24 +106,13 @@ export default async function AdminPage() {
           </p>
           <div className="detail-list">
             <div>
-              <strong>Authentication</strong>
-              <span>Authenticated</span>
-            </div>
-            <div>
               <strong>Current email</strong>
               <span>{user.email}</span>
             </div>
             <div>
-              <strong>User-client lookup</strong>
+              <strong>Profile lookup</strong>
               <span>
                 {currentProfileLookup.userClientError ??
-                  "No profile row returned."}
-              </span>
-            </div>
-            <div>
-              <strong>Service-role lookup</strong>
-              <span>
-                {currentProfileLookup.serviceRoleError ??
                   "No profile row returned."}
               </span>
             </div>
@@ -146,12 +148,6 @@ export default async function AdminPage() {
               <span>{currentProfile.status}</span>
             </div>
           </div>
-          {currentProfileLookup.rlsLikelyBlocking ? (
-            <p className="notice error">
-              RLS may be blocking the authenticated profile read. The service
-              role found this profile row.
-            </p>
-          ) : null}
         </section>
       </main>
     );
@@ -193,6 +189,11 @@ export default async function AdminPage() {
   const revokedCount = profiles.filter(
     (profile) => profile.status === "revoked"
   ).length;
+  const message =
+    searchParams?.message === "approved-db-only" ||
+    searchParams?.message === "revoked-db-only"
+      ? adminMessages[searchParams.message]
+      : null;
 
   return (
     <main className="shell">
@@ -206,10 +207,6 @@ export default async function AdminPage() {
         </div>
         <div className="detail-list">
           <div>
-            <strong>Authentication</strong>
-            <span>Authenticated</span>
-          </div>
-          <div>
             <strong>Admin email</strong>
             <span>{currentProfile.email || user.email}</span>
           </div>
@@ -220,10 +217,6 @@ export default async function AdminPage() {
           <div>
             <strong>Status</strong>
             <span>{currentProfile.status}</span>
-          </div>
-          <div>
-            <strong>Profiles returned</strong>
-            <span>{profiles.length}</span>
           </div>
           <div>
             <strong>Pending users</strong>
@@ -237,22 +230,9 @@ export default async function AdminPage() {
             <strong>Revoked users</strong>
             <span>{revokedCount}</span>
           </div>
-          <div>
-            <strong>RLS check</strong>
-            <span>
-              {currentProfileLookup.rlsLikelyBlocking
-                ? "User profile read is likely blocked by RLS. Service-role lookup found the row."
-                : "Current admin profile row was returned or no service-role mismatch was detected."}
-            </span>
-          </div>
         </div>
 
-        {currentProfileLookup.rlsLikelyBlocking ? (
-          <p className="notice error">
-            RLS may be blocking the authenticated admin profile read. The
-            service role found the row, so check the profiles select policies.
-          </p>
-        ) : null}
+        {message ? <p className="notice">{message}</p> : null}
 
         {vpnAgentStatus.configured ? (
           <div className="notice">
@@ -260,9 +240,10 @@ export default async function AdminPage() {
             the peer from the VPS and archives that user&apos;s client files.
           </div>
         ) : (
-          <div className="notice error">
-            Provisioning is disabled: {vpnAgentStatus.reason} Admin profile
-            data can still be reviewed.
+          <div className="notice">
+            VPN provisioning is offline: {vpnAgentStatus.reason} Approve and
+            revoke still update portal status, but WireGuard changes are
+            skipped until the VPS agent is connected.
           </div>
         )}
 
@@ -311,15 +292,7 @@ export default async function AdminPage() {
                     {profile.status === "pending" ? (
                       <form method="post" action="/api/admin/approve">
                         <input type="hidden" name="userId" value={profile.id} />
-                        <button
-                          disabled={!vpnAgentStatus.configured}
-                          title={
-                            vpnAgentStatus.configured
-                              ? "Approve user"
-                              : "Provisioning is disabled until the VPS agent is configured."
-                          }
-                          type="submit"
-                        >
+                        <button type="submit">
                           Approve
                         </button>
                       </form>
@@ -327,16 +300,7 @@ export default async function AdminPage() {
                     {profile.status === "approved" ? (
                       <form method="post" action="/api/admin/revoke">
                         <input type="hidden" name="userId" value={profile.id} />
-                        <button
-                          className="danger"
-                          disabled={!vpnAgentStatus.configured}
-                          title={
-                            vpnAgentStatus.configured
-                              ? "Revoke user"
-                              : "Revocation is disabled until the VPS agent is configured."
-                          }
-                          type="submit"
-                        >
+                        <button className="danger" type="submit">
                           Revoke
                         </button>
                       </form>

@@ -15,7 +15,6 @@ export type ProfileLookupDiagnostics = {
   serviceRoleProfile: Profile | null;
   userClientError: string | null;
   serviceRoleError: string | null;
-  rlsLikelyBlocking: boolean;
 };
 
 function errorMessage(error: unknown) {
@@ -67,26 +66,24 @@ export async function lookupProfileWithDiagnostics(
 
   const userClientError = errorMessage(userClientLookupError);
   const profile = userClientProfile ?? serviceRoleProfile ?? null;
-  const rlsLikelyBlocking =
-    !userClientProfile && Boolean(serviceRoleProfile) && Boolean(userClientError);
 
-  console.log("UnitedVPN profile lookup diagnostics", {
-    source,
-    userId,
-    userClientReturned: Boolean(userClientProfile),
-    userClientError,
-    serviceRoleReturned: Boolean(serviceRoleProfile),
-    serviceRoleError,
-    rlsLikelyBlocking,
-    profileReturned: Boolean(profile)
-  });
+  if (!profile) {
+    console.error("UnitedVPN profile lookup failed", {
+      source,
+      userId,
+      userClientReturned: Boolean(userClientProfile),
+      userClientError,
+      serviceRoleReturned: Boolean(serviceRoleProfile),
+      serviceRoleError,
+      profileReturned: Boolean(profile)
+    });
+  }
 
   return {
     profile,
     userClientProfile: userClientProfile ?? null,
     serviceRoleProfile,
     userClientError,
-    serviceRoleError,
-    rlsLikelyBlocking
+    serviceRoleError
   };
 }

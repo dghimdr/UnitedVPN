@@ -89,23 +89,13 @@ export default async function DashboardPage() {
           </p>
           <div className="detail-list">
             <div>
-              <strong>Authentication</strong>
-              <span>Authenticated</span>
-            </div>
-            <div>
               <strong>Current user</strong>
               <span>{user.email}</span>
             </div>
             <div>
-              <strong>User-client lookup</strong>
+              <strong>Profile lookup</strong>
               <span>
                 {profileLookup.userClientError ?? "No profile row returned."}
-              </span>
-            </div>
-            <div>
-              <strong>Service-role lookup</strong>
-              <span>
-                {profileLookup.serviceRoleError ?? "No profile row returned."}
               </span>
             </div>
           </div>
@@ -138,10 +128,6 @@ export default async function DashboardPage() {
         </div>
         <div className="detail-list">
           <div>
-            <strong>Authentication</strong>
-            <span>Authenticated</span>
-          </div>
-          <div>
             <strong>User email</strong>
             <span>{profile.email || user.email}</span>
           </div>
@@ -171,26 +157,7 @@ export default async function DashboardPage() {
             <strong>Approval date</strong>
             <span>{approvalDate}</span>
           </div>
-          <div>
-            <strong>Profile row returned</strong>
-            <span>{profileLookup.profile ? "Yes" : "No"}</span>
-          </div>
-          <div>
-            <strong>RLS check</strong>
-            <span>
-              {profileLookup.rlsLikelyBlocking
-                ? "User profile read is likely blocked by RLS. Service-role lookup found the row."
-                : "User profile read is available or no service-role mismatch was detected."}
-            </span>
-          </div>
         </div>
-
-        {profileLookup.rlsLikelyBlocking ? (
-          <p className="notice error">
-            RLS may be blocking the authenticated profile read. The profile row
-            exists, but the user client could not read it.
-          </p>
-        ) : null}
 
         {profile.status === "pending" ? (
           <p className="notice">

@@ -7,14 +7,6 @@ import { vpnUsernameFromUserId } from "@/lib/usernames";
 export async function POST(request: Request) {
   await requireAdmin();
   const vpnAgentStatus = getVpnAgentStatus();
-
-  if (!vpnAgentStatus.configured) {
-    return NextResponse.json(
-      { error: vpnAgentStatus.reason ?? "VPS agent is not configured" },
-      { status: 503 }
-    );
-  }
-
   const formData = await request.formData();
   const userId = String(formData.get("userId") ?? "");
   const admin = createAdminClient();
@@ -46,6 +38,27 @@ export async function POST(request: Request) {
   }
 
   const vpnUsername = profile.vpn_username ?? vpnUsernameFromUserId(profile.id);
+  const approvedAt = new Date().toISOString();
+
+  if (!vpnAgentStatus.configured) {
+    const { error: updateError } = await admin
+      .from("profiles")
+      .update({
+        status: "approved",
+        approved_at: approvedAt,
+        revoked_at: null
+      })
+      .eq("id", profile.id);
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+
+    return NextResponse.redirect(
+      new URL("/admin?message=approved-db-only", request.url),
+      303
+    );
+  }
 
   try {
     await callVpnAgent("/v1/provision", {
@@ -64,8 +77,8 @@ export async function POST(request: Request) {
     .update({
       status: "approved",
       vpn_username: vpnUsername,
-      approved_at: new Date().toISOString(),
-      provisioned_at: new Date().toISOString(),
+      approved_at: approvedAt,
+      provisioned_at: approvedAt,
       revoked_at: null
     })
     .eq("id", profile.id);
