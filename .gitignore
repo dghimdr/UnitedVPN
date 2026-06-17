@@ -1,14 +1,11 @@
-# Local operator config.
-config/vpn.env
-
-# Never commit generated WireGuard secrets or client files.
-*.key
-*.conf.generated
-clients/
-backups/
-*.tar.gz
-*.png
-
-# OS/editor noise.
+node_modules/
+.next/
+out/
+dist/
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .DS_Store
-*.swp
