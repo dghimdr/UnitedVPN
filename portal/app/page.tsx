@@ -31,6 +31,8 @@ export default async function HomePage() {
 
   return (
     <main className="landing">
+      <div className="ambient ambient-hero" aria-hidden="true" />
+      <div className="ambient ambient-diagonal" aria-hidden="true" />
       <section className="club-hero">
         <div className="motion-line" aria-hidden="true" />
         <p className="hero-index" aria-hidden="true">
