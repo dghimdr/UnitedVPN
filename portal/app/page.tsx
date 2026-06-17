@@ -4,16 +4,16 @@ import { createClient } from "@/lib/supabase/server";
 
 const pillars = [
   {
-    title: "Private",
-    text: "A closed network for known members, not a public VPN service."
+    title: "Belonging",
+    text: "Access is reserved for known people inside a trusted circle."
   },
   {
-    title: "Approved",
-    text: "Every account is reviewed before access is granted."
+    title: "Approval",
+    text: "Membership begins with review, not automatic entry."
   },
   {
-    title: "Secure",
-    text: "WireGuard access for trusted devices with admin-controlled status."
+    title: "Loyalty",
+    text: "One approved member, one trusted device, revocable when needed."
   }
 ];
 
@@ -33,19 +33,19 @@ export default async function HomePage() {
     <main className="landing">
       <section className="club-hero">
         <div className="motion-line" aria-hidden="true" />
+        <p className="hero-index" aria-hidden="true">
+          Private access through a trusted network.
+        </p>
         <div className="brand-mark" aria-label="UnitedVPN">
-          <span>UV</span>
+          <span>U</span>
         </div>
         <div className="hero-copy">
-          <p className="eyebrow">Private membership network</p>
+          <p className="eyebrow">Invitation only</p>
           <h1>UnitedVPN</h1>
           <p className="hero-kicker">
             Private internet access. By invitation only.
           </p>
-          <p className="hero-subtitle">
-            A private network built for approved members, trusted devices, and
-            secure access anywhere.
-          </p>
+          <p className="hero-subtitle">A private network for approved members.</p>
           <div className="hero-actions" aria-label="UnitedVPN account actions">
             <Link className="button landing-primary" href="/signup">
               Request Access
@@ -60,7 +60,7 @@ export default async function HomePage() {
       <section className="landing-section editorial-section">
         <div className="section-heading">
           <p className="eyebrow">Why UnitedVPN</p>
-          <h2>Access is limited by design.</h2>
+          <h2>Built around trust, restraint, and membership.</h2>
         </div>
         <div className="pillar-list">
           {pillars.map((pillar) => (
@@ -75,7 +75,7 @@ export default async function HomePage() {
       <section className="landing-section access-section">
         <div className="section-heading">
           <p className="eyebrow">How access works</p>
-          <h2>Simple steps. No automatic entry.</h2>
+          <h2>Request first. Enter only when approved.</h2>
         </div>
         <ol className="access-track">
           {accessSteps.map((step, index) => (
@@ -90,7 +90,7 @@ export default async function HomePage() {
       <section className="landing-section membership-section">
         <div>
           <p className="eyebrow">Membership</p>
-          <h2>Private by default.</h2>
+          <h2>A private network, held close.</h2>
         </div>
         <ul className="membership-list">
           <li>Invite only.</li>
