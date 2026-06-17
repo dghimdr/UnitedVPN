@@ -1,0 +1,14 @@
+# Local operator config.
+config/vpn.env
+
+# Never commit generated WireGuard secrets or client files.
+*.key
+*.conf.generated
+clients/
+backups/
+*.tar.gz
+*.png
+
+# OS/editor noise.
+.DS_Store
+*.swp
