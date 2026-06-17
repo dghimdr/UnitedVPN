@@ -439,6 +439,25 @@ th {
   padding-top: 10px;
 }
 
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 760px;
+  padding-top: 8px;
+}
+
+.trust-strip span {
+  border: 1px solid rgba(218, 41, 28, 0.46);
+  padding: 8px 10px;
+  color: #f2f2f2;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  background: rgba(17, 17, 17, 0.68);
+}
+
 .button.landing-primary,
 .button.landing-secondary {
   position: relative;
@@ -533,6 +552,14 @@ th {
   max-width: 760px;
 }
 
+.section-heading p:not(.eyebrow) {
+  max-width: 560px;
+  margin-bottom: 0;
+  color: #d0d0d0;
+  font-size: 19px;
+  line-height: 1.55;
+}
+
 .pillar-list {
   display: grid;
   gap: 0;
@@ -587,7 +614,7 @@ th {
 
 .access-track {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   margin: 0;
   padding: 0;
@@ -597,12 +624,13 @@ th {
 
 .access-track li {
   position: relative;
-  min-height: 170px;
-  padding: 22px 22px 0 0;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-height: 210px;
+  padding: 24px 24px 0 0;
   border-right: 1px solid rgba(218, 41, 28, 0.22);
   color: #ffffff;
-  font-size: clamp(22px, 3vw, 38px);
-  font-weight: 850;
   line-height: 1.08;
   transition:
     border-color 220ms ease,
@@ -632,16 +660,153 @@ th {
 
 .access-track span {
   display: block;
-  margin-bottom: 54px;
   color: var(--landing-red);
   font-size: 12px;
   font-weight: 800;
 }
 
+.access-track strong {
+  color: #ffffff;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 850;
+  line-height: 1.08;
+}
+
+.access-track p {
+  max-width: 270px;
+  margin-bottom: 0;
+  color: #bdbdbd;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.section-cta {
+  justify-self: start;
+}
+
+.benefits-section,
+.status-section,
 .membership-section {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 96px;
+}
+
+.benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.benefit-card,
+.status-board {
+  border: 1px solid rgba(218, 41, 28, 0.24);
+  background: rgba(17, 17, 17, 0.74);
+}
+
+.benefit-card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-height: 180px;
+  padding: 22px;
+  transition:
+    border-color 220ms ease,
+    transform 220ms ease,
+    background-color 220ms ease;
+}
+
+.benefit-card:hover {
+  border-color: rgba(218, 41, 28, 0.62);
+  background: rgba(24, 16, 16, 0.84);
+  transform: translateY(-3px);
+}
+
+.benefit-card h3 {
+  max-width: 280px;
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.08;
+}
+
+.benefit-card p {
+  max-width: 310px;
+  margin-bottom: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.status-board {
+  display: grid;
+  gap: 0;
+}
+
+.status-board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px;
+  border-bottom: 1px solid rgba(218, 41, 28, 0.28);
+}
+
+.status-board-header span {
+  color: #ffffff;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 850;
+  line-height: 1.05;
+}
+
+.status-board-header strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.status-board-header strong::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  content: "";
+  background: var(--landing-red);
+  box-shadow: 0 0 18px rgba(218, 41, 28, 0.8);
+}
+
+.status-metrics {
+  display: grid;
+  margin: 0;
+}
+
+.status-metrics div {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.55fr) minmax(0, 1fr);
+  gap: 22px;
+  padding: 20px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-metrics div:last-child {
+  border-bottom: 0;
+}
+
+.status-metrics dt,
+.status-metrics dd {
+  margin: 0;
+}
+
+.status-metrics dt {
+  color: #8f8f8f;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-metrics dd {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .membership-list {
@@ -782,6 +947,12 @@ th {
   color: #b7b7b7;
 }
 
+.footer-copy strong {
+  color: #ffffff;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
 .footer-links {
   justify-content: flex-end;
 }
@@ -845,6 +1016,8 @@ th {
   }
 
   .editorial-section,
+  .benefits-section,
+  .status-section,
   .membership-section {
     grid-template-columns: 1fr;
     gap: 44px;
@@ -865,16 +1038,18 @@ th {
 
 @media (max-width: 900px) {
   .access-track {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .access-track li {
-    min-height: 138px;
+    min-height: 0;
+    padding: 22px 0;
+    border-right: 0;
     border-bottom: 1px solid rgba(218, 41, 28, 0.24);
   }
 
-  .access-track li:nth-child(2) {
-    border-right: 0;
+  .benefit-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -978,12 +1153,24 @@ th {
     width: 100%;
   }
 
+  .trust-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .trust-strip span {
+    text-align: center;
+  }
+
   .button.landing-primary,
   .button.landing-secondary {
     min-width: 0;
   }
 
   .editorial-section,
+  .benefits-section,
+  .status-section,
   .membership-section {
     grid-template-columns: 1fr;
     gap: 36px;
@@ -1027,15 +1214,34 @@ th {
     font-size: 30px;
   }
 
+  .access-track strong {
+    font-size: 30px;
+  }
+
   .access-track li:hover,
   .pillar-item:hover,
+  .benefit-card:hover,
   .button.landing-primary:hover,
   .button.landing-secondary:hover {
     transform: none;
   }
 
-  .access-track span {
-    margin-bottom: 18px;
+  .benefit-card {
+    min-height: 0;
+    padding: 20px 0;
+    border-right: 0;
+    border-left: 0;
+    background: transparent;
+  }
+
+  .status-board-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .status-metrics div {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .membership-list li {
