@@ -223,9 +223,10 @@ th {
 
 .landing {
   position: relative;
-  overflow: hidden;
-  width: min(1240px, calc(100% - 32px));
-  padding: 48px 0 44px;
+  overflow: clip;
+  width: 100%;
+  max-width: 1440px;
+  padding: 56px clamp(56px, 5vw, 80px) 48px;
   color: var(--landing-text);
 }
 
@@ -383,23 +384,26 @@ th {
 .landing h3 {
   color: var(--landing-text);
   line-height: 1;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
 }
 
 .landing h1 {
   max-width: 1160px;
   margin-bottom: 0;
-  font-size: clamp(64px, 15vw, 208px);
+  font-size: clamp(56px, 11vw, 156px);
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
+  white-space: nowrap;
   text-shadow: 0 0 38px rgba(218, 41, 28, 0.22);
 }
 
 .landing h2 {
   max-width: 760px;
   margin-bottom: 0;
-  font-size: clamp(36px, 6vw, 78px);
+  font-size: clamp(34px, 5vw, 68px);
   font-weight: 850;
   letter-spacing: 0;
 }
@@ -816,6 +820,9 @@ th {
   font-size: clamp(54px, 11vw, 130px);
   line-height: 0.98;
   text-transform: uppercase;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
 }
 
 .legal-content {
@@ -832,6 +839,11 @@ th {
 }
 
 @media (max-width: 1180px) {
+  .landing {
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+
   .editorial-section,
   .membership-section {
     grid-template-columns: 1fr;
@@ -894,8 +906,8 @@ th {
   }
 
   .landing {
-    width: min(100% - 24px, 1040px);
-    padding: 22px 0 44px;
+    width: 100%;
+    padding: 22px 20px 44px;
   }
 
   .club-hero {
@@ -946,7 +958,7 @@ th {
   }
 
   .landing h1 {
-    font-size: 62px;
+    font-size: clamp(44px, 14vw, 60px);
   }
 
   .landing h2 {
