@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { signOut } from "@/lib/actions";
 import type { Language } from "@/lib/i18n";
 import type { PublicVpnRegion, VpnRegionId } from "@/lib/vpn-regions";
@@ -40,6 +41,7 @@ const dashboardCopy = {
       "Each location uses a separate WireGuard profile. Please activate only one UNITEDVPN profile at a time.",
     available: "Available",
     comingSoon: "Coming soon",
+    profileNotReady: "UK VPN profile is not ready yet. Please contact admin.",
     profileLabel: "WireGuard profile",
     showQr: "Show QR Code",
     downloadConfig: "Download Config",
@@ -67,6 +69,8 @@ const dashboardCopy = {
       "각 위치는 별도의 WireGuard 프로필을 사용합니다. UNITEDVPN 프로필은 한 번에 하나만 활성화해 주세요.",
     available: "사용 가능",
     comingSoon: "곧 제공 예정",
+    profileNotReady:
+      "영국 VPN 프로필이 아직 준비되지 않았습니다. 관리자에게 문의해 주세요.",
     profileLabel: "WireGuard 프로필",
     showQr: "QR 코드 보기",
     downloadConfig: "설정 파일 다운로드",
@@ -84,13 +88,26 @@ const dashboardCopy = {
   }
 } satisfies Record<Language, Record<string, string>>;
 
+function getDashboardAssetPath({
+  regionId,
+  asset
+}: {
+  regionId: VpnRegionId;
+  asset: "config" | "qr";
+}) {
+  return regionId === "sg" ? `/api/vpn/${asset}` : `/api/vpn/${regionId}/${asset}`;
+}
+
 function createVpnNodes(regions: PublicVpnRegion[]): VpnNode[] {
   return regions.map((region) => ({
     regionId: region.id,
     status: region.enabled ? "available" : "coming-soon",
     wireGuardProfileName: region.profileName,
-    qrEndpoint: `/api/vpn/qr?region=${region.id}`,
-    configDownloadEndpoint: `/api/vpn/config?region=${region.id}`,
+    qrEndpoint: getDashboardAssetPath({ regionId: region.id, asset: "qr" }),
+    configDownloadEndpoint: getDashboardAssetPath({
+      regionId: region.id,
+      asset: "config"
+    }),
     copy:
       region.id === "sg"
         ? {
@@ -369,6 +386,8 @@ function LocationCard({
   lang: Language;
   copy: (typeof dashboardCopy)[Language];
 }) {
+  const [error, setError] = useState<string | null>(null);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
   const isAvailable = node.status === "available";
   const actionsEnabled =
     isAvailable &&
@@ -376,6 +395,77 @@ function LocationCard({
     Boolean(node.qrEndpoint) &&
     Boolean(node.configDownloadEndpoint);
   const nodeCopy = node.copy[lang];
+
+  useEffect(() => {
+    return () => {
+      if (qrUrl) {
+        URL.revokeObjectURL(qrUrl);
+      }
+    };
+  }, [qrUrl]);
+
+  async function readError(response: Response) {
+    try {
+      const payload = (await response.json()) as { error?: string };
+      return payload.error || copy.profileNotReady;
+    } catch {
+      return copy.profileNotReady;
+    }
+  }
+
+  async function showQrCode() {
+    if (!actionsEnabled) {
+      return;
+    }
+
+    setError(null);
+
+    const response = await fetch(node.qrEndpoint, { cache: "no-store" });
+    if (!response.ok) {
+      setError(await readError(response));
+      return;
+    }
+
+    const blob = await response.blob();
+    const nextQrUrl = URL.createObjectURL(blob);
+    setQrUrl((currentQrUrl) => {
+      if (currentQrUrl) {
+        URL.revokeObjectURL(currentQrUrl);
+      }
+
+      return nextQrUrl;
+    });
+  }
+
+  async function downloadConfig() {
+    if (!actionsEnabled) {
+      return;
+    }
+
+    setError(null);
+
+    const response = await fetch(node.configDownloadEndpoint, {
+      cache: "no-store"
+    });
+    if (!response.ok) {
+      setError(await readError(response));
+      return;
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const disposition = response.headers.get("content-disposition") ?? "";
+    const filenameMatch = disposition.match(/filename="([^"]+)"/);
+
+    link.href = downloadUrl;
+    link.download =
+      filenameMatch?.[1] ?? `${node.wireGuardProfileName.replace(/\s+/g, "-")}.conf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+  }
 
   return (
     <article className={`vpn-location-card ${isAvailable ? "" : "disabled"}`}>
@@ -400,24 +490,38 @@ function LocationCard({
 
       <div className="row action-row">
         {actionsEnabled ? (
-          <a className="button" href={node.qrEndpoint}>
+          <button className="button" onClick={showQrCode} type="button">
             {copy.showQr}
-          </a>
+          </button>
         ) : (
           <button type="button" disabled>
             {copy.showQr}
           </button>
         )}
         {actionsEnabled ? (
-          <a className="button secondary" href={node.configDownloadEndpoint}>
+          <button
+            className="secondary"
+            onClick={downloadConfig}
+            type="button"
+          >
             {copy.downloadConfig}
-          </a>
+          </button>
         ) : (
           <button className="secondary" type="button" disabled>
             {copy.downloadConfig}
           </button>
         )}
       </div>
+
+      {error ? <p className="notice error">{error}</p> : null}
+      {qrUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          alt={`${node.wireGuardProfileName} QR code`}
+          className="qr"
+          src={qrUrl}
+        />
+      ) : null}
 
       <p className="helper-copy">{nodeCopy.helper}</p>
     </article>

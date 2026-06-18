@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   getConfiguredVpnRegionIds,
   getPublicVpnRegions,
+  getVpnPortalAssetPath,
   getVpnRegionForRequest,
   isVpnRegionConfigured
 } from "../lib/vpn-regions.ts";
@@ -79,4 +80,16 @@ test("exposes public region metadata without server public keys", () => {
   assert.equal(uk?.displayName, "United Kingdom");
   assert.equal(uk?.enabled, true);
   assert.equal("serverPublicKey" in (uk ?? {}), false);
+});
+
+test("builds default Singapore and path-style UK portal asset URLs", () => {
+  resetEnv();
+
+  const sg = getVpnRegionForRequest("sg");
+  const uk = getVpnRegionForRequest("uk");
+
+  assert.equal(getVpnPortalAssetPath({ region: sg, asset: "config" }), "/api/vpn/config");
+  assert.equal(getVpnPortalAssetPath({ region: sg, asset: "qr" }), "/api/vpn/qr");
+  assert.equal(getVpnPortalAssetPath({ region: uk, asset: "config" }), "/api/vpn/uk/config");
+  assert.equal(getVpnPortalAssetPath({ region: uk, asset: "qr" }), "/api/vpn/uk/qr");
 });

@@ -117,3 +117,17 @@ export function getVpnAgentAssetPath({
 
   return `/v1/client/${safeUsername}/${region.id}/${asset}`;
 }
+
+export function getVpnPortalAssetPath({
+  region,
+  asset
+}: {
+  region: Pick<VpnRegion, "id">;
+  asset: "config" | "qr";
+}) {
+  if (region.id === "sg") {
+    return `/api/vpn/${asset}`;
+  }
+
+  return `/api/vpn/${region.id}/${asset}`;
+}
