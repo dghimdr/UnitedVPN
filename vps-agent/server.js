@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { spawn } from "node:child_process";
-import { createReadStream, promises as fs } from "node:fs";
+import { constants as fsConstants, createReadStream, promises as fs } from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,7 +19,7 @@ const repoDir = process.env.UNITEDVPN_REPO_DIR ?? "/opt/UnitedVPN";
 const clientsDir = process.env.WIREGUARD_CLIENTS_DIR ?? "/etc/wireguard/clients";
 const regionClientsDirs = {
   sg: process.env.WIREGUARD_SG_CLIENTS_DIR ?? clientsDir,
-  uk: process.env.WIREGUARD_UK_CLIENTS_DIR
+  uk: process.env.WIREGUARD_UK_CLIENTS_DIR ?? "/etc/wireguard/clients-uk"
 };
 const enableUkProvisioning = envFlagEnabled(process.env.ENABLE_UK_PROVISIONING);
 const maxBodyBytes = Number(process.env.MAX_BODY_BYTES ?? 4096);
@@ -153,7 +153,13 @@ async function sendFile(res, username, extension, contentType, region = "sg") {
     return;
   }
 
-  await fs.access(resolved);
+  try {
+    await fs.access(resolved, fsConstants.R_OK);
+  } catch {
+    sendJson(res, 404, { error: "Not found" });
+    return;
+  }
+
   res.writeHead(200, {
     "content-type": contentType,
     "cache-control": "no-store"
@@ -161,7 +167,7 @@ async function sendFile(res, username, extension, contentType, region = "sg") {
   createReadStream(resolved).pipe(res);
 }
 
-async function handle(req, res) {
+export async function handle(req, res) {
   if (req.url === "/healthz") {
     sendJson(res, 200, { ok: true });
     return;
@@ -280,9 +286,13 @@ async function handle(req, res) {
   }
 }
 
-const server = http.createServer(handle);
+export function createUnitedVpnAgentServer() {
+  return http.createServer(handle);
+}
 
-server.listen(port, "127.0.0.1", () => {
-  const currentFile = fileURLToPath(import.meta.url);
+const currentFile = fileURLToPath(import.meta.url);
+if (process.argv[1] === currentFile) {
+  const server = createUnitedVpnAgentServer();
   console.log(`UnitedVPN agent listening on 127.0.0.1:${port} from ${currentFile}`);
-});
+  server.listen(port, "127.0.0.1");
+}

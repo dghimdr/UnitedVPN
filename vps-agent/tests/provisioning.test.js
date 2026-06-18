@@ -50,6 +50,20 @@ test("requires an explicit UK clients directory for UK asset serving", () => {
   );
 });
 
+test("defaults UK asset serving to /etc/wireguard/clients-uk when env is absent", () => {
+  assert.equal(
+    getRegionClientsDir({
+      region: "uk",
+      clientsDir: "/etc/wireguard/clients",
+      regionClientsDirs: {
+        sg: "/etc/wireguard/clients",
+        uk: "/etc/wireguard/clients-uk"
+      }
+    }),
+    "/etc/wireguard/clients-uk"
+  );
+});
+
 test("treats duplicate provision and missing revoke as idempotent script outcomes", () => {
   assert.equal(isBenignProvisionError("UK user already exists: david"), true);
   assert.equal(isBenignRevokeError("UK user not found: david"), true);
