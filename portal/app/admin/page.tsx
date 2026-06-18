@@ -236,8 +236,8 @@ export default async function AdminPage({
 
         {vpnAgentStatus.configured ? (
           <div className="notice">
-            Approving creates exactly one WireGuard profile. Revoking removes
-            the peer from the VPS and archives that user&apos;s client files.
+            Approving creates the default Singapore WireGuard profile. Revoking
+            removes the peer from the VPS and archives that user&apos;s client files.
           </div>
         ) : (
           <div className="notice">

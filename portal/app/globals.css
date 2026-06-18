@@ -152,6 +152,13 @@ label {
   font-weight: 700;
 }
 
+.field-help {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
 input,
 textarea,
 select {
@@ -462,13 +469,15 @@ th {
 
 .guide-grid,
 .setup-option-grid,
-.faq-grid {
+.faq-grid,
+.download-guide-grid {
   display: grid;
   gap: 14px;
 }
 
 .guide-grid,
-.setup-option-grid {
+.setup-option-grid,
+.download-guide-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -478,7 +487,9 @@ th {
 
 .guide-card,
 .setup-option,
-.faq-card {
+.faq-card,
+.guide-copy-card,
+.download-guide-card {
   display: grid;
   align-content: start;
   gap: 10px;
@@ -597,6 +608,37 @@ th {
   border-bottom: 1px solid var(--line);
 }
 
+.guide-step-list.eight {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.guide-step-list.eight li:nth-child(4) {
+  border-right: 0;
+}
+
+.guide-step-list.eight li:nth-child(-n + 4) {
+  border-bottom: 1px solid var(--line);
+}
+
+.guide-copy-card {
+  gap: 8px;
+  max-width: 820px;
+}
+
+.download-guide-card a {
+  justify-self: start;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.guide-note {
+  margin-bottom: 0;
+  border-left: 4px solid var(--accent);
+  padding: 12px;
+  background: #fff7ed;
+  color: var(--text);
+}
+
 .mini-step-list {
   display: grid;
   gap: 8px;
@@ -639,6 +681,7 @@ th {
 .guide-step-list p,
 .setup-option p,
 .faq-card p,
+.guide-copy-card p,
 .usage-note p,
 .guide-hero-copy p,
 .guide-section-heading p {
@@ -952,7 +995,9 @@ th {
 }
 
 html:lang(ko) .topbar,
-html:lang(ko) .landing {
+html:lang(ko) .landing,
+html:lang(ko) .shell,
+html:lang(ko) .legal-page {
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
   word-break: keep-all;
 }
@@ -961,7 +1006,7 @@ html:lang(ko) .landing h1,
 html:lang(ko) .landing h2,
 html:lang(ko) .landing h3,
 html:lang(ko) .hero-kicker,
-html:lang(ko) .status-board-header span {
+html:lang(ko) .privacy-highlight-list strong {
   word-break: keep-all;
   overflow-wrap: normal;
   text-wrap: balance;
@@ -974,7 +1019,13 @@ html:lang(ko) .landing dt,
 html:lang(ko) .landing dd,
 html:lang(ko) .topbar a,
 html:lang(ko) .topbar button,
-html:lang(ko) .button {
+html:lang(ko) .button,
+html:lang(ko) label,
+html:lang(ko) input,
+html:lang(ko) .field-help,
+html:lang(ko) .notice,
+html:lang(ko) .legal-page p,
+html:lang(ko) .legal-page li {
   word-break: keep-all;
   overflow-wrap: break-word;
   text-wrap: pretty;
@@ -1464,7 +1515,7 @@ html:lang(ko) .benefit-card p {
 }
 
 .benefits-section,
-.status-section,
+.privacy-section,
 .membership-section,
 .locations-section {
   display: grid;
@@ -1611,6 +1662,59 @@ html:lang(ko) .benefit-card p {
   color: #ffffff;
   font-size: 20px;
   font-weight: 800;
+}
+
+.privacy-highlight-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.privacy-highlight-list li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 8px;
+  border: 1px solid rgba(218, 41, 28, 0.24);
+  padding: 20px;
+  background: rgba(17, 17, 17, 0.74);
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease,
+    transform 220ms ease;
+}
+
+.privacy-highlight-list li:hover {
+  border-color: rgba(218, 41, 28, 0.62);
+  background: rgba(24, 16, 16, 0.84);
+  transform: translateY(-3px);
+}
+
+.privacy-highlight-list li > span {
+  grid-row: 1 / span 2;
+  width: 10px;
+  height: 10px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--landing-red);
+  box-shadow: 0 0 18px rgba(218, 41, 28, 0.72);
+}
+
+.privacy-highlight-list strong {
+  color: #ffffff;
+  font-size: clamp(20px, 2.3vw, 30px);
+  font-weight: 850;
+  line-height: 1.1;
+}
+
+.privacy-highlight-list p {
+  max-width: 520px;
+  margin-bottom: 0;
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 .membership-list {
@@ -1800,10 +1904,19 @@ html:lang(ko) .benefit-card p {
   hyphens: none;
 }
 
+.legal-header p:not(.eyebrow) {
+  margin: 0;
+  color: #c8c8c8;
+}
+
+.legal-back-link {
+  justify-self: start;
+}
+
 .legal-content {
   display: grid;
-  gap: 22px;
-  max-width: 720px;
+  gap: 18px;
+  max-width: 820px;
 }
 
 .legal-content p {
@@ -1811,6 +1924,48 @@ html:lang(ko) .benefit-card p {
   color: #d0d0d0;
   font-size: 19px;
   line-height: 1.6;
+}
+
+.legal-intro {
+  border: 1px solid rgba(218, 41, 28, 0.24);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(17, 17, 17, 0.74);
+}
+
+.legal-section {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(218, 41, 28, 0.26);
+  padding-top: 18px;
+}
+
+.legal-section h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1.1;
+}
+
+.legal-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: #d0d0d0;
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+.contact-card {
+  border: 1px solid rgba(218, 41, 28, 0.24);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(17, 17, 17, 0.74);
+}
+
+.contact-card .button {
+  justify-self: start;
 }
 
 @media (max-width: 1180px) {
@@ -1821,7 +1976,7 @@ html:lang(ko) .benefit-card p {
 
   .editorial-section,
   .benefits-section,
-  .status-section,
+  .privacy-section,
   .membership-section,
   .locations-section {
     grid-template-columns: 1fr;
@@ -1865,8 +2020,10 @@ html:lang(ko) .benefit-card p {
   .guide-grid,
   .setup-option-grid,
   .faq-grid,
+  .download-guide-grid,
   .guide-step-list,
   .guide-step-list.six,
+  .guide-step-list.eight,
   .activation-grid,
   .dashboard-hero-card,
   .quick-step-grid,
@@ -1889,6 +2046,14 @@ html:lang(ko) .benefit-card p {
   }
 
   .guide-step-list.six li:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .guide-step-list.eight li:nth-child(4) {
+    border-right: 0;
+  }
+
+  .guide-step-list.eight li:nth-child(-n + 4) {
     border-bottom: 1px solid var(--line);
   }
 
@@ -2102,7 +2267,7 @@ html:lang(ko) .benefit-card p {
 
   .editorial-section,
   .benefits-section,
-  .status-section,
+  .privacy-section,
   .membership-section,
   .locations-section {
     grid-template-columns: 1fr;
@@ -2154,6 +2319,7 @@ html:lang(ko) .benefit-card p {
   .access-track li:hover,
   .pillar-item:hover,
   .benefit-card:hover,
+  .privacy-highlight-list li:hover,
   .button.landing-primary:hover,
   .button.landing-secondary:hover {
     transform: none;
@@ -2167,14 +2333,11 @@ html:lang(ko) .benefit-card p {
     background: transparent;
   }
 
-  .status-board-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .status-metrics div {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .privacy-highlight-list li {
+    padding: 18px 0;
+    border-right: 0;
+    border-left: 0;
+    background: transparent;
   }
 
   .membership-list li {

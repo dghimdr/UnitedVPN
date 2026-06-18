@@ -68,7 +68,31 @@ const benefits: { title: TranslationKey; text: TranslationKey }[] = [
   }
 ];
 
+const privacyHighlights: { title: TranslationKey; text: TranslationKey }[] = [
+  {
+    title: "privacy_public_wifi_title",
+    text: "privacy_public_wifi_text"
+  },
+  {
+    title: "privacy_ip_title",
+    text: "privacy_ip_text"
+  },
+  {
+    title: "privacy_locations_title",
+    text: "privacy_locations_text"
+  },
+  {
+    title: "privacy_invited_title",
+    text: "privacy_invited_text"
+  },
+  {
+    title: "privacy_wireguard_title",
+    text: "privacy_wireguard_text"
+  }
+];
+
 export function LandingPageClient() {
+  // Function Role: Renders the marketing landing page using the active locale without touching VPN runtime flows.
   const { lang } = useLanguage();
 
   return (
@@ -146,6 +170,24 @@ export function LandingPageClient() {
         </Link>
       </section>
 
+      <section className="landing-section locations-section">
+        <div className="section-heading">
+          <p className="eyebrow">{t("locations_eyebrow", lang)}</p>
+          <h2>{t("locations_title", lang)}</h2>
+          <p>{t("locations_text", lang)}</p>
+        </div>
+        <div className="location-note-list">
+          <article className="location-note">
+            <h3>{t("locations_singapore_name", lang)}</h3>
+            <p>{t("locations_singapore_instruction", lang)}</p>
+          </article>
+          <article className="location-note">
+            <h3>{t("locations_uk_name", lang)}</h3>
+            <p>{t("locations_uk_instruction", lang)}</p>
+          </article>
+        </div>
+      </section>
+
       <section className="landing-section benefits-section">
         <div className="section-heading">
           <p className="eyebrow">{t("benefits_eyebrow", lang)}</p>
@@ -161,31 +203,24 @@ export function LandingPageClient() {
         </div>
       </section>
 
-      <section className="landing-section status-section">
+      <section className="landing-section privacy-section">
         <div className="section-heading">
-          <p className="eyebrow">{t("status_eyebrow", lang)}</p>
-          <h2>{t("status_title", lang)}</h2>
+          <p className="eyebrow">{t("privacy_eyebrow", lang)}</p>
+          <h2>{t("privacy_title", lang)}</h2>
+          <p>{t("privacy_text", lang)}</p>
         </div>
-        <div className="status-board" aria-label={t("status_board_label", lang)}>
-          <div className="status-board-header">
-            <span>{t("status_node", lang)}</span>
-            <strong>{t("status_online", lang)}</strong>
-          </div>
-          <dl className="status-metrics">
-            <div>
-              <dt>{t("status_label", lang)}</dt>
-              <dd>{t("status_online", lang)}</dd>
-            </div>
-            <div>
-              <dt>{t("status_capacity_label", lang)}</dt>
-              <dd>{t("status_capacity_value", lang)}</dd>
-            </div>
-            <div>
-              <dt>{t("status_uptime_label", lang)}</dt>
-              <dd>{t("status_uptime_value", lang)}</dd>
-            </div>
-          </dl>
-        </div>
+        <ul
+          className="privacy-highlight-list"
+          aria-label={t("privacy_highlights_label", lang)}
+        >
+          {privacyHighlights.map((highlight) => (
+            <li key={highlight.title}>
+              <span aria-hidden="true" />
+              <strong>{t(highlight.title, lang)}</strong>
+              <p>{t(highlight.text, lang)}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <footer className="landing-footer">

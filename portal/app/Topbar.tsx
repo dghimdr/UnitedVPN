@@ -18,6 +18,7 @@ export function Topbar({ isAuthenticated }: { isAuthenticated: boolean }) {
           {isAuthenticated ? (
             <>
               <Link href="/dashboard">{t("nav_dashboard", lang)}</Link>
+              <Link href="/guide">{t("nav_guide", lang)}</Link>
               <Link href="/admin">{t("nav_admin", lang)}</Link>
               <form action={signOut}>
                 <button className="secondary" type="submit">
@@ -28,6 +29,7 @@ export function Topbar({ isAuthenticated }: { isAuthenticated: boolean }) {
           ) : (
             <>
               <Link href="/login">{t("nav_login", lang)}</Link>
+              <Link href="/guide">{t("nav_guide", lang)}</Link>
               <Link className="button" href="/signup">
                 {t("nav_signup", lang)}
               </Link>
