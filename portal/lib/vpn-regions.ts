@@ -96,6 +96,10 @@ export function getPublicVpnRegions(): PublicVpnRegion[] {
   });
 }
 
+export function getConfiguredVpnRegionIds(): VpnRegionId[] {
+  return vpnRegionIds.filter((id) => isVpnRegionConfigured(getVpnRegions()[id]));
+}
+
 export function getVpnAgentAssetPath({
   region,
   username,

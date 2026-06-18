@@ -4,6 +4,14 @@ import { createReadStream, promises as fs } from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  envFlagEnabled,
+  getProvisionScripts,
+  getRegionClientsDir,
+  getRevokeScripts,
+  isBenignProvisionError,
+  isBenignRevokeError
+} from "./provisioning.js";
 
 const port = Number(process.env.PORT ?? 8787);
 const sharedSecret = requiredEnv("UNITEDVPN_SHARED_SECRET");
@@ -13,10 +21,10 @@ const regionClientsDirs = {
   sg: process.env.WIREGUARD_SG_CLIENTS_DIR ?? clientsDir,
   uk: process.env.WIREGUARD_UK_CLIENTS_DIR
 };
+const enableUkProvisioning = envFlagEnabled(process.env.ENABLE_UK_PROVISIONING);
 const maxBodyBytes = Number(process.env.MAX_BODY_BYTES ?? 4096);
 const allowedSkewSeconds = 300;
 const usernamePattern = /^[a-zA-Z0-9_-]{1,32}$/;
-const regionPattern = /^(sg|uk)$/;
 
 function requiredEnv(name) {
   const value = process.env[name];
@@ -89,7 +97,7 @@ function validateUsername(username) {
   }
 }
 
-function runScript(scriptName, username) {
+function runScript(scriptName, username, options = {}) {
   validateUsername(username);
 
   return new Promise((resolve, reject) => {
@@ -112,6 +120,16 @@ function runScript(scriptName, username) {
     child.on("close", (code) => {
       if (code === 0) {
         resolve({ stdout });
+      } else if (
+        options.allowExisting &&
+        isBenignProvisionError(stderr || stdout)
+      ) {
+        resolve({ stdout });
+      } else if (
+        options.allowMissing &&
+        isBenignRevokeError(stderr || stdout)
+      ) {
+        resolve({ stdout });
       } else {
         reject(new Error(stderr || stdout || `Script exited with ${code}`));
       }
@@ -119,22 +137,13 @@ function runScript(scriptName, username) {
   });
 }
 
-function getRegionClientsDir(region) {
-  if (!regionPattern.test(region)) {
-    throw new Error("Invalid VPN region");
-  }
-
-  const regionDir = regionClientsDirs[region];
-  if (!regionDir) {
-    throw new Error("VPN region is not configured");
-  }
-
-  return regionDir;
-}
-
 async function sendFile(res, username, extension, contentType, region = "sg") {
   validateUsername(username);
-  const selectedClientsDir = getRegionClientsDir(region);
+  const selectedClientsDir = getRegionClientsDir({
+    region,
+    clientsDir,
+    regionClientsDirs
+  });
   const filePath = path.join(selectedClientsDir, username, `${username}.${extension}`);
   const resolved = path.resolve(filePath);
   const allowedPrefix = path.resolve(selectedClientsDir) + path.sep;
@@ -176,15 +185,51 @@ async function handle(req, res) {
   try {
     if (req.method === "POST" && url.pathname === "/v1/provision") {
       const { username } = JSON.parse(body || "{}");
-      await runScript("add-user.sh", username);
-      sendJson(res, 200, { ok: true, username });
+      const scripts = getProvisionScripts({ enableUkProvisioning });
+      for (const scriptName of scripts) {
+        await runScript(scriptName, username, { allowExisting: true });
+      }
+      sendJson(res, 200, { ok: true, username, regions: enableUkProvisioning ? ["sg", "uk"] : ["sg"] });
+      return;
+    }
+
+    const regionalProvisionMatch = url.pathname.match(/^\/v1\/provision\/(sg|uk)$/);
+    if (req.method === "POST" && regionalProvisionMatch) {
+      const { username } = JSON.parse(body || "{}");
+      const region = regionalProvisionMatch[1];
+      const scripts = getProvisionScripts({
+        enableUkProvisioning,
+        region
+      });
+      for (const scriptName of scripts) {
+        await runScript(scriptName, username, { allowExisting: true });
+      }
+      sendJson(res, 200, { ok: true, username, regions: [region] });
       return;
     }
 
     if (req.method === "POST" && url.pathname === "/v1/revoke") {
       const { username } = JSON.parse(body || "{}");
-      await runScript("remove-user.sh", username);
-      sendJson(res, 200, { ok: true, username });
+      const scripts = getRevokeScripts({ enableUkProvisioning });
+      for (const scriptName of scripts) {
+        await runScript(scriptName, username, { allowMissing: true });
+      }
+      sendJson(res, 200, { ok: true, username, regions: enableUkProvisioning ? ["sg", "uk"] : ["sg"] });
+      return;
+    }
+
+    const regionalRevokeMatch = url.pathname.match(/^\/v1\/revoke\/(sg|uk)$/);
+    if (req.method === "POST" && regionalRevokeMatch) {
+      const { username } = JSON.parse(body || "{}");
+      const region = regionalRevokeMatch[1];
+      const scripts = getRevokeScripts({
+        enableUkProvisioning,
+        region
+      });
+      for (const scriptName of scripts) {
+        await runScript(scriptName, username, { allowMissing: true });
+      }
+      sendJson(res, 200, { ok: true, username, regions: [region] });
       return;
     }
 

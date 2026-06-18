@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { callVpnAgent, getVpnAgentStatus } from "@/lib/vpn-agent";
+import { getConfiguredVpnRegionIds } from "@/lib/vpn-regions";
 import { vpnUsernameFromUserId } from "@/lib/usernames";
 
 export async function POST(request: Request) {
@@ -69,6 +70,13 @@ export async function POST(request: Request) {
       method: "POST",
       body: { username: vpnUsername }
     });
+
+    if (getConfiguredVpnRegionIds().includes("uk")) {
+      await callVpnAgent("/v1/provision/uk", {
+        method: "POST",
+        body: { username: vpnUsername }
+      });
+    }
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "VPN provisioning failed";
@@ -99,6 +107,20 @@ export async function POST(request: Request) {
             : "Unknown revoke rollback error"
       });
     });
+
+    if (getConfiguredVpnRegionIds().includes("uk")) {
+      await callVpnAgent("/v1/revoke/uk", {
+        method: "POST",
+        body: { username: vpnUsername }
+      }).catch((revokeError) => {
+        console.error("UnitedVPN approve rollback UK revoke failed", {
+          message:
+            revokeError instanceof Error
+              ? revokeError.message
+              : "Unknown UK revoke rollback error"
+        });
+      });
+    }
 
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }

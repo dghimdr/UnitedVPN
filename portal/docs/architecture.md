@@ -158,7 +158,7 @@ WG_SG_SERVER_PUBLIC_KEY=
 WG_SG_VPN_SUBNET=
 WG_UK_ENDPOINT_HOST=45.63.96.40
 WG_UK_ENDPOINT_PORT=51820
-WG_UK_SERVER_PUBLIC_KEY=
+WG_UK_SERVER_PUBLIC_KEY=pcW+Re55jzLJamMiq96RUCQndFLGA3pSEylPQY96GSo=
 WG_UK_VPN_SUBNET=10.9.0.0/24
 ENABLE_UK_REGION=false
 ```
@@ -174,6 +174,7 @@ UNITEDVPN_REPO_DIR=/opt/UnitedVPN
 WIREGUARD_CLIENTS_DIR=/etc/wireguard/clients
 WIREGUARD_SG_CLIENTS_DIR=/etc/wireguard/clients
 WIREGUARD_UK_CLIENTS_DIR=/etc/wireguard/clients-uk
+ENABLE_UK_PROVISIONING=false
 MAX_BODY_BYTES=4096
 ```
 
@@ -209,6 +210,9 @@ PORT=8787
 UNITEDVPN_SHARED_SECRET=<same secret as Vercel>
 UNITEDVPN_REPO_DIR=/opt/UnitedVPN
 WIREGUARD_CLIENTS_DIR=/etc/wireguard/clients
+WIREGUARD_SG_CLIENTS_DIR=/etc/wireguard/clients
+WIREGUARD_UK_CLIENTS_DIR=/etc/wireguard/clients-uk
+ENABLE_UK_PROVISIONING=false
 ```
 
 Create `/etc/systemd/system/unitedvpn-agent.service`:
@@ -245,7 +249,22 @@ If the agent does not run as root, allow only these sudo commands with `NOPASSWD
 ```text
 /bin/bash /opt/UnitedVPN/scripts/add-user.sh *
 /bin/bash /opt/UnitedVPN/scripts/remove-user.sh *
+/bin/bash /opt/UnitedVPN/scripts/add-uk-user.sh *
+/bin/bash /opt/UnitedVPN/scripts/remove-uk-user.sh *
 ```
+
+### UK Backfill And Verification
+
+Keep `ENABLE_UK_REGION=false` until one real approved-user UK profile has been generated and tested from the dashboard.
+
+1. On `vpn-uk-london-1`, copy `config/uk.env.example` to `/etc/wireguard/uk.env`.
+2. Generate David's UK client assets with `sudo bash scripts/add-uk-user.sh <david_vpn_username>`.
+3. Confirm the generated files exist under `/etc/wireguard/clients-uk/<david_vpn_username>/`.
+4. Confirm `sudo wg show wg0` lists David's UK peer.
+5. Confirm the agent serving UK assets has `WIREGUARD_UK_CLIENTS_DIR=/etc/wireguard/clients-uk`.
+6. Only after backend access is confirmed, set Vercel `ENABLE_UK_REGION=true`.
+7. Log in as David, choose United Kingdom on the dashboard, download or scan the UK profile, and confirm the public IP geolocates to London.
+8. If any step fails, set `ENABLE_UK_REGION=false` before further debugging.
 
 ## Security Checklist
 

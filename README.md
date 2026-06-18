@@ -1,6 +1,6 @@
 # Private WireGuard VPN
 
-Simple production-ready WireGuard setup for an Ubuntu 24.04 VPS in Singapore, sized for up to 20 trusted users.
+Simple production-ready WireGuard setup for Ubuntu 24.04 VPS nodes, with Singapore as the original/default node and United Kingdom as a separate WireGuard profile.
 
 ## What this project creates
 
@@ -10,6 +10,7 @@ Simple production-ready WireGuard setup for an Ubuntu 24.04 VPS in Singapore, si
 - Automatic client config generation
 - QR code PNG generation for iPhone and Android
 - Easy add, remove, and list user scripts
+- UK client provisioning scripts that keep UK assets separate from Singapore
 - Backup, update, and monitoring helpers
 - Operator documentation
 
@@ -20,6 +21,7 @@ Simple production-ready WireGuard setup for an Ubuntu 24.04 VPS in Singapore, si
 ├── README.md
 ├── config/
 │   ├── vpn.env.example
+│   ├── uk.env.example
 │   └── wg0.conf.example
 ├── docs/
 │   ├── backup.md
@@ -29,12 +31,14 @@ Simple production-ready WireGuard setup for an Ubuntu 24.04 VPS in Singapore, si
 │   └── updates.md
 └── scripts/
     ├── add-user.sh
+    ├── add-uk-user.sh
     ├── backup.sh
     ├── install-server.sh
     ├── lib.sh
     ├── list-users.sh
     ├── monitor.sh
     ├── remove-user.sh
+    ├── remove-uk-user.sh
     └── update-server.sh
 ```
 
@@ -67,6 +71,27 @@ Show the QR code in the terminal:
 ```bash
 sudo qrencode -t ansiutf8 < /etc/wireguard/clients/david/david.conf
 ```
+
+## UK Node Provisioning
+
+The UK node uses a separate profile, subnet, state file, and client asset directory. Do not reuse a Singapore config for UK.
+
+On `vpn-uk-london-1`, copy `config/uk.env.example` to `/etc/wireguard/uk.env`, then generate UK assets with:
+
+```bash
+sudo bash scripts/add-uk-user.sh <vpn_username>
+sudo qrencode -t ansiutf8 < /etc/wireguard/clients-uk/<vpn_username>/<vpn_username>.conf
+```
+
+UK defaults:
+
+- Endpoint: `45.63.96.40:51820`
+- VPN network: `10.9.0.0/24`
+- Server VPN IP: `10.9.0.1`
+- Client IP range: `10.9.0.3` to `10.9.0.22`
+- Reserved: `10.9.0.2` for the manual David test client
+
+Do not install or modify UFW for the UK task. The confirmed UK NAT rule is managed through persistent iptables/netfilter rules.
 
 ## Important Defaults
 

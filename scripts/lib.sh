@@ -2,7 +2,7 @@
 set -euo pipefail
 
 CONFIG_FILE="${CONFIG_FILE:-/etc/wireguard/vpn.env}"
-LOCAL_CONFIG_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/config/vpn.env"
+LOCAL_CONFIG_FILE="${LOCAL_CONFIG_FILE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/config/vpn.env}"
 
 load_config() {
   if [[ -f "$CONFIG_FILE" ]]; then
@@ -98,6 +98,17 @@ endpoint_host() {
   fi
 }
 
+server_public_key() {
+  if [[ -n "${SERVER_PUBLIC_KEY:-}" ]]; then
+    echo "$SERVER_PUBLIC_KEY"
+  elif [[ -f "$WG_DIR/server_public.key" ]]; then
+    cat "$WG_DIR/server_public.key"
+  else
+    echo "SERVER_PUBLIC_KEY or $WG_DIR/server_public.key must be set." >&2
+    exit 1
+  fi
+}
+
 detect_public_interface() {
   if [[ -n "${PUBLIC_INTERFACE:-}" ]]; then
     echo "$PUBLIC_INTERFACE"
@@ -122,7 +133,15 @@ user_exists() {
 
 allocated_ip_exists() {
   local ip="$1"
-  [[ -f "$STATE_FILE" ]] && awk -F '\t' -v ip="$ip" 'NR > 1 && $2 == ip { found=1 } END { exit !found }' "$STATE_FILE"
+  if [[ -f "$STATE_FILE" ]] && awk -F '\t' -v ip="$ip" 'NR > 1 && $2 == ip { found=1 } END { exit !found }' "$STATE_FILE"; then
+    return 0
+  fi
+
+  if [[ -f "$WG_DIR/${WG_INTERFACE}.conf" ]] && grep -Eq "AllowedIPs[[:space:]]*=[[:space:]]*${ip//./\\.}/32([[:space:]]|$)" "$WG_DIR/${WG_INTERFACE}.conf"; then
+    return 0
+  fi
+
+  return 1
 }
 
 next_client_ip() {

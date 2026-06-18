@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { callVpnAgent, getVpnAgentStatus } from "@/lib/vpn-agent";
+import { getConfiguredVpnRegionIds } from "@/lib/vpn-regions";
 
 export async function POST(request: Request) {
   const adminCheck = await requireAdminApi();
@@ -30,6 +31,13 @@ export async function POST(request: Request) {
         method: "POST",
         body: { username: profile.vpn_username }
       });
+
+      if (getConfiguredVpnRegionIds().includes("uk")) {
+        await callVpnAgent("/v1/revoke/uk", {
+          method: "POST",
+          body: { username: profile.vpn_username }
+        });
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "VPN revocation failed";

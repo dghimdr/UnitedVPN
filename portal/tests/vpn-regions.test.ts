@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  getConfiguredVpnRegionIds,
   getPublicVpnRegions,
   getVpnRegionForRequest,
   isVpnRegionConfigured
@@ -46,6 +47,7 @@ test("only marks UK configured when enabled and required UK env vars exist", () 
   const uk = getVpnRegionForRequest("uk");
 
   assert.equal(isVpnRegionConfigured(uk), true);
+  assert.deepEqual(getConfiguredVpnRegionIds(), ["sg", "uk"]);
 });
 
 test("keeps UK disabled when the enable flag is false", () => {
@@ -60,6 +62,7 @@ test("keeps UK disabled when the enable flag is false", () => {
   const uk = getVpnRegionForRequest("uk");
 
   assert.equal(isVpnRegionConfigured(uk), false);
+  assert.deepEqual(getConfiguredVpnRegionIds(), ["sg"]);
 });
 
 test("exposes public region metadata without server public keys", () => {
