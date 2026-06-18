@@ -1,21 +1,49 @@
 import { NextResponse } from "next/server";
 import { requireApprovedVpnProfile } from "@/lib/vpn-access";
 import { callVpnAgent } from "@/lib/vpn-agent";
+import {
+  getVpnAgentAssetPath,
+  getVpnRegionForRequest,
+  isVpnRegionConfigured
+} from "@/lib/vpn-regions";
 
-export async function GET() {
+export async function GET(request: Request) {
   const access = await requireApprovedVpnProfile();
   if (!access.ok) {
     return access.response;
   }
 
+  let region;
+  try {
+    region = getVpnRegionForRequest(
+      new URL(request.url).searchParams.get("region")
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Unsupported VPN region" },
+      { status: 400 }
+    );
+  }
+
+  if (!isVpnRegionConfigured(region)) {
+    return NextResponse.json(
+      { error: "VPN region is not configured yet" },
+      { status: 503 }
+    );
+  }
+
   const config = await callVpnAgent<ArrayBuffer>(
-    `/v1/client/${encodeURIComponent(access.vpnUsername)}/config`
+    getVpnAgentAssetPath({
+      region,
+      username: access.vpnUsername,
+      asset: "config"
+    })
   );
 
   return new NextResponse(config, {
     headers: {
       "content-type": "application/octet-stream",
-      "content-disposition": `attachment; filename="${access.vpnUsername}.conf"`,
+      "content-disposition": `attachment; filename="${access.vpnUsername}-${region.id}.conf"`,
       "cache-control": "no-store"
     }
   });

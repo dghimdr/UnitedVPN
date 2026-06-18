@@ -18,8 +18,12 @@ Apply `supabase/schema.sql` to a Supabase project before using the app.
 - `/auth/login`: login.
 - `/dashboard`: user VPN state, QR, and config download.
 - `/admin`: manual approval and revocation.
-- `/api/user/qr`: approved user's WireGuard QR PNG.
-- `/api/user/config`: approved user's WireGuard `.conf` download.
+- `/api/vpn/qr?region=sg`: approved user's Singapore WireGuard QR PNG.
+- `/api/vpn/config?region=sg`: approved user's Singapore WireGuard `.conf` download.
+- `/api/vpn/qr?region=uk`: approved user's United Kingdom WireGuard QR PNG when UK is enabled.
+- `/api/vpn/config?region=uk`: approved user's United Kingdom WireGuard `.conf` download when UK is enabled.
+
+Requests without `region` default to Singapore for backwards compatibility.
 
 ## Architecture
 

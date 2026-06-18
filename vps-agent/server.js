@@ -9,9 +9,14 @@ const port = Number(process.env.PORT ?? 8787);
 const sharedSecret = requiredEnv("UNITEDVPN_SHARED_SECRET");
 const repoDir = process.env.UNITEDVPN_REPO_DIR ?? "/opt/UnitedVPN";
 const clientsDir = process.env.WIREGUARD_CLIENTS_DIR ?? "/etc/wireguard/clients";
+const regionClientsDirs = {
+  sg: process.env.WIREGUARD_SG_CLIENTS_DIR ?? clientsDir,
+  uk: process.env.WIREGUARD_UK_CLIENTS_DIR
+};
 const maxBodyBytes = Number(process.env.MAX_BODY_BYTES ?? 4096);
 const allowedSkewSeconds = 300;
 const usernamePattern = /^[a-zA-Z0-9_-]{1,32}$/;
+const regionPattern = /^(sg|uk)$/;
 
 function requiredEnv(name) {
   const value = process.env[name];
@@ -114,11 +119,25 @@ function runScript(scriptName, username) {
   });
 }
 
-async function sendFile(res, username, extension, contentType) {
+function getRegionClientsDir(region) {
+  if (!regionPattern.test(region)) {
+    throw new Error("Invalid VPN region");
+  }
+
+  const regionDir = regionClientsDirs[region];
+  if (!regionDir) {
+    throw new Error("VPN region is not configured");
+  }
+
+  return regionDir;
+}
+
+async function sendFile(res, username, extension, contentType, region = "sg") {
   validateUsername(username);
-  const filePath = path.join(clientsDir, username, `${username}.${extension}`);
+  const selectedClientsDir = getRegionClientsDir(region);
+  const filePath = path.join(selectedClientsDir, username, `${username}.${extension}`);
   const resolved = path.resolve(filePath);
-  const allowedPrefix = path.resolve(clientsDir) + path.sep;
+  const allowedPrefix = path.resolve(selectedClientsDir) + path.sep;
 
   if (!resolved.startsWith(allowedPrefix)) {
     sendJson(res, 400, { error: "Invalid path" });
@@ -175,9 +194,37 @@ async function handle(req, res) {
       return;
     }
 
+    const regionalConfigMatch = url.pathname.match(
+      /^\/v1\/client\/([a-zA-Z0-9_-]{1,32})\/(sg|uk)\/config$/
+    );
+    if (req.method === "GET" && regionalConfigMatch) {
+      await sendFile(
+        res,
+        regionalConfigMatch[1],
+        "conf",
+        "application/octet-stream",
+        regionalConfigMatch[2]
+      );
+      return;
+    }
+
     const qrMatch = url.pathname.match(/^\/v1\/client\/([a-zA-Z0-9_-]{1,32})\/qr$/);
     if (req.method === "GET" && qrMatch) {
       await sendFile(res, qrMatch[1], "png", "image/png");
+      return;
+    }
+
+    const regionalQrMatch = url.pathname.match(
+      /^\/v1\/client\/([a-zA-Z0-9_-]{1,32})\/(sg|uk)\/qr$/
+    );
+    if (req.method === "GET" && regionalQrMatch) {
+      await sendFile(
+        res,
+        regionalQrMatch[1],
+        "png",
+        "image/png",
+        regionalQrMatch[2]
+      );
       return;
     }
 

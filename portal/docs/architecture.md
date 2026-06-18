@@ -15,10 +15,11 @@ Vercel must never store WireGuard configs, server private keys, or other users' 
 ## Affected Files And Flows
 
 - `portal/app/auth/*`: email/password signup and login.
-- `portal/app/dashboard/page.tsx`: pending, approved, and revoked user states.
+- `portal/app/dashboard/page.tsx`: pending, approved, revoked, and location-selection user states.
 - `portal/app/admin/page.tsx`: manual approval and revoke UI.
 - `portal/app/api/admin/*`: server-only admin approval and revocation actions.
-- `portal/app/api/user/*`: approved-user QR and `.conf` streaming.
+- `portal/app/api/vpn/*`: approved-user region-aware QR and `.conf` streaming.
+- `portal/lib/vpn-regions.ts`: central Singapore and United Kingdom VPN region metadata.
 - `portal/supabase/schema.sql`: profiles table, RLS, admin checks, and 20 approved-user cap.
 - `vps-agent/server.js`: signed API on the VPS that runs WireGuard scripts and streams files.
 - Existing VPS scripts: `scripts/add-user.sh`, `scripts/remove-user.sh`, `scripts/list-users.sh`.
@@ -44,7 +45,7 @@ No WireGuard private keys, client configs, QR images, or server private keys are
 2. Supabase trigger creates `profiles` row with `status = pending` and `role = user`.
 3. Admin reviews pending users in `/admin`.
 4. Admin approval calls the VPS agent and only marks the DB row approved after provisioning succeeds.
-5. Approved users can access `/dashboard`, `/api/user/qr`, and `/api/user/config`.
+5. Approved users can access `/dashboard`, `/api/vpn/qr`, and `/api/vpn/config`.
 6. Revoked users lose dashboard asset access, and the peer is removed from the VPS immediately.
 
 Bootstrap the first admin manually after that account signs up:
@@ -60,10 +61,11 @@ where email = 'david@example.com';
 The user dashboard shows:
 
 - `pending`: approval notice, no VPN files.
-- `approved`: QR for iPhone/Android and `.conf` download for Mac/Windows.
+- `approved`: location cards for Singapore and United Kingdom, with QR for iPhone/Android and `.conf` download for Mac/Windows.
 - `revoked`: revoked notice, no VPN files.
 
 The QR and config endpoints re-check Supabase Auth and the user's profile status on every request.
+Requests without `region` default to Singapore. Supported region values are `sg` and `uk`.
 
 ## Admin Dashboard
 
@@ -124,19 +126,21 @@ Revoked users cannot fetch QR or config because the dashboard API checks `status
 
 ## QR Display Flow
 
-1. Browser requests `/api/user/qr`.
+1. Browser requests `/api/vpn/qr?region=sg` or `/api/vpn/qr?region=uk`.
 2. Vercel checks Supabase session and `profiles.status = approved`.
-3. Vercel calls `GET /v1/client/<vpn_username>/qr`.
-4. VPS agent streams the PNG from `/etc/wireguard/clients/<username>/<username>.png`.
-5. Vercel returns `image/png` with `cache-control: no-store`.
+3. Vercel validates the region and checks whether that region is configured.
+4. Vercel calls `GET /v1/client/<vpn_username>/qr` for Singapore or `GET /v1/client/<vpn_username>/uk/qr` for UK.
+5. VPS agent streams the PNG from that region's client directory.
+6. Vercel returns `image/png` with `cache-control: no-store`.
 
 ## Config Download Flow
 
-1. Browser requests `/api/user/config`.
+1. Browser requests `/api/vpn/config?region=sg` or `/api/vpn/config?region=uk`.
 2. Vercel checks Supabase session and `profiles.status = approved`.
-3. Vercel calls `GET /v1/client/<vpn_username>/config`.
-4. VPS agent streams the `.conf` file from the user's own client directory.
-5. Vercel returns an attachment with `cache-control: no-store`.
+3. Vercel validates the region and checks whether that region is configured.
+4. Vercel calls `GET /v1/client/<vpn_username>/config` for Singapore or `GET /v1/client/<vpn_username>/uk/config` for UK.
+5. VPS agent streams the `.conf` file from that region's client directory.
+6. Vercel returns an attachment with `cache-control: no-store`.
 
 ## Environment Variables
 
@@ -148,7 +152,18 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 VPS_AGENT_BASE_URL=https://vpn-agent.example.com
 VPS_AGENT_SHARED_SECRET=
+WG_SG_ENDPOINT_HOST=
+WG_SG_ENDPOINT_PORT=51820
+WG_SG_SERVER_PUBLIC_KEY=
+WG_SG_VPN_SUBNET=
+WG_UK_ENDPOINT_HOST=45.63.96.40
+WG_UK_ENDPOINT_PORT=51820
+WG_UK_SERVER_PUBLIC_KEY=
+WG_UK_VPN_SUBNET=10.9.0.0/24
+ENABLE_UK_REGION=false
 ```
+
+`ENABLE_UK_REGION=true` only enables UK actions when `WG_UK_ENDPOINT_HOST`, `WG_UK_SERVER_PUBLIC_KEY`, and `WG_UK_VPN_SUBNET` are also present. Do not set it to `true` until the UK VPS has generated region-specific client configs and QR PNGs.
 
 VPS agent:
 
@@ -157,6 +172,8 @@ PORT=8787
 UNITEDVPN_SHARED_SECRET=
 UNITEDVPN_REPO_DIR=/opt/UnitedVPN
 WIREGUARD_CLIENTS_DIR=/etc/wireguard/clients
+WIREGUARD_SG_CLIENTS_DIR=/etc/wireguard/clients
+WIREGUARD_UK_CLIENTS_DIR=/etc/wireguard/clients-uk
 MAX_BODY_BYTES=4096
 ```
 

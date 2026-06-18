@@ -1,6 +1,8 @@
 import { getSupabaseEnvStatus } from "@/lib/env";
 import { lookupProfileWithDiagnostics } from "@/lib/profile-lookup";
 import { createClient } from "@/lib/supabase/server";
+import { getPublicVpnRegions } from "@/lib/vpn-regions";
+import { DashboardVpnOnboarding } from "./DashboardVpnOnboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -115,6 +117,25 @@ export default async function DashboardPage() {
   const approvalDate = profile.approved_at
     ? new Date(profile.approved_at).toLocaleString()
     : "Not approved yet";
+  const isApproved = profile.status === "approved";
+
+  if (isApproved) {
+    return (
+      <main className="dashboard-shell">
+        <DashboardVpnOnboarding
+          canDownloadVpnConfig={Boolean(hasProvisionedVpnProfile)}
+          regions={getPublicVpnRegions()}
+          userEmail={profile.email || user.email || "Approved user"}
+        />
+        {!hasProvisionedVpnProfile ? (
+          <p className="notice dashboard-provisioning-notice">
+            VPN profile not provisioned yet. Your account is approved, but a
+            WireGuard profile is not available yet.
+          </p>
+        ) : null}
+      </main>
+    );
+  }
 
   return (
     <main className="shell">
@@ -173,29 +194,6 @@ export default async function DashboardPage() {
           </p>
         ) : null}
 
-        {profile.status === "approved" && !hasProvisionedVpnProfile ? (
-          <p className="notice">
-            VPN profile not provisioned yet. Your account is approved, but a
-            WireGuard profile is not available yet.
-          </p>
-        ) : null}
-
-        {hasProvisionedVpnProfile ? (
-          <div className="grid two">
-            <section className="stack">
-              <h2>Phone setup</h2>
-              <p>Scan this QR code in the WireGuard iPhone or Android app.</p>
-              <img className="qr" src="/api/vpn/qr" alt="WireGuard QR code" />
-            </section>
-            <section className="stack">
-              <h2>Computer setup</h2>
-              <p>Download the WireGuard config for Mac or Windows.</p>
-              <a className="button" href="/api/vpn/config">
-                Download .conf
-              </a>
-            </section>
-          </div>
-        ) : null}
       </section>
     </main>
   );
