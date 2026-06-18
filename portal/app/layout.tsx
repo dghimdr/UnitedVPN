@@ -1,8 +1,8 @@
 import "./globals.css";
-import Link from "next/link";
-import { signOut } from "@/lib/actions";
 import { getSupabaseEnvStatus } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
+import { LanguageProvider } from "./language-provider";
+import { Topbar } from "./Topbar";
 
 export const metadata = {
   title: "UnitedVPN Portal",
@@ -37,32 +37,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="topbar">
-          <Link className="brand" href={user ? "/dashboard" : "/"}>
-            UnitedVPN Portal
-          </Link>
-          <nav className="row">
-            {user ? (
-              <>
-                <Link href="/dashboard">Dashboard</Link>
-                <Link href="/admin">Admin</Link>
-                <form action={signOut}>
-                  <button className="secondary" type="submit">
-                    Sign out
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <Link href="/login">Log in</Link>
-                <Link className="button" href="/signup">
-                  Sign up
-                </Link>
-              </>
-            )}
-          </nav>
-        </header>
-        {children}
+        <LanguageProvider>
+          <Topbar isAuthenticated={Boolean(user)} />
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

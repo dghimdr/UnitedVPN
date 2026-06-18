@@ -72,6 +72,40 @@ main {
   color: var(--landing-text);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  min-width: 0;
+}
+
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 6px;
+  color: var(--landing-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.language-toggle button {
+  min-height: auto;
+  padding: 4px 2px;
+  border-radius: 0;
+  background: transparent;
+  color: var(--landing-muted);
+  font-size: inherit;
+  line-height: 1.2;
+}
+
+.language-toggle button:hover,
+.language-toggle button.active {
+  background: transparent;
+  color: var(--landing-text);
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -191,6 +225,10 @@ button,
   align-items: center;
   justify-content: center;
   min-height: 42px;
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 button:hover,
@@ -321,6 +359,70 @@ th {
 
 .landing p {
   color: var(--landing-muted);
+}
+
+html:lang(ko) .topbar,
+html:lang(ko) .landing {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+  word-break: keep-all;
+}
+
+html:lang(ko) .landing h1,
+html:lang(ko) .landing h2,
+html:lang(ko) .landing h3,
+html:lang(ko) .hero-kicker,
+html:lang(ko) .status-board-header span {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  text-wrap: balance;
+}
+
+html:lang(ko) .landing p,
+html:lang(ko) .landing span,
+html:lang(ko) .landing strong,
+html:lang(ko) .landing dt,
+html:lang(ko) .landing dd,
+html:lang(ko) .topbar a,
+html:lang(ko) .topbar button,
+html:lang(ko) .button {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+html:lang(ko) .landing h2 {
+  max-width: 860px;
+  line-height: 1.12;
+}
+
+html:lang(ko) .landing h3 {
+  line-height: 1.16;
+}
+
+html:lang(ko) .hero-kicker {
+  max-width: 980px;
+  font-size: clamp(34px, 5.8vw, 82px);
+  line-height: 1.13;
+}
+
+html:lang(ko) .hero-subtitle,
+html:lang(ko) .section-heading p:not(.eyebrow),
+html:lang(ko) .pillar-item p,
+html:lang(ko) .benefit-card p,
+html:lang(ko) .access-track p {
+  line-height: 1.62;
+}
+
+html:lang(ko) .pillar-item p {
+  max-width: 460px;
+}
+
+html:lang(ko) .access-track p {
+  max-width: 320px;
+}
+
+html:lang(ko) .benefit-card p {
+  max-width: 340px;
 }
 
 .ambient {
@@ -481,7 +583,7 @@ th {
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
-  white-space: nowrap;
+  white-space: normal;
   text-shadow: 0 0 38px rgba(218, 41, 28, 0.22);
 }
 
@@ -539,6 +641,7 @@ th {
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
+  overflow-wrap: anywhere;
   text-transform: uppercase;
   background: rgba(17, 17, 17, 0.68);
 }
@@ -547,9 +650,10 @@ th {
 .button.landing-secondary {
   position: relative;
   overflow: hidden;
-  min-width: 164px;
+  min-width: min(164px, 100%);
   border-radius: 0;
   padding: 14px 18px;
+  line-height: 1.2;
   text-transform: uppercase;
   transition:
     border-color 180ms ease,
@@ -1156,6 +1260,17 @@ th {
   .topbar {
     align-items: center;
     flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .topbar-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .topbar-actions nav {
+    flex: 1 1 auto;
   }
 
   table, thead, tbody, th, td, tr {
@@ -1232,6 +1347,22 @@ th {
 
   .hero-kicker {
     font-size: 38px;
+  }
+
+  html:lang(ko) .hero-kicker {
+    font-size: 34px;
+    line-height: 1.16;
+  }
+
+  html:lang(ko) .landing h2 {
+    font-size: 38px;
+    line-height: 1.16;
+  }
+
+  html:lang(ko) .landing h3,
+  html:lang(ko) .pillar-item h3 {
+    font-size: 31px;
+    line-height: 1.18;
   }
 
   .hero-subtitle {
