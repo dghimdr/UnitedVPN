@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireApprovedVpnProfile } from "@/lib/vpn-access";
-import { callVpnAgent } from "@/lib/vpn-agent";
+import { callVpnAgent, VpnAgentError } from "@/lib/vpn-agent";
 import {
   getVpnAgentAssetPath,
   getVpnRegionForRequest,
@@ -11,6 +11,10 @@ import {
 type VpnAsset = "config" | "qr";
 
 function statusFromAgentError(error: unknown) {
+  if (error instanceof VpnAgentError) {
+    return error.upstreamStatus ?? 502;
+  }
+
   if (!(error instanceof Error)) {
     return 502;
   }
@@ -20,13 +24,38 @@ function statusFromAgentError(error: unknown) {
 }
 
 function messageFromAgentError(error: unknown, regionId: VpnRegionId) {
-  if (error instanceof Error && error.message.includes("VPN agent 404")) {
+  if (
+    error instanceof VpnAgentError &&
+    (error.upstreamStatus === 404 || error.message.includes("VPN agent 404"))
+  ) {
     return regionId === "uk"
       ? "UK VPN profile is not ready yet. Please contact admin."
       : "VPN profile is not ready yet. Please contact admin.";
   }
 
   return error instanceof Error ? error.message : "VPN profile request failed.";
+}
+
+function diagnosticPayload(error: unknown, regionId: VpnRegionId, asset: VpnAsset) {
+  if (error instanceof VpnAgentError) {
+    return {
+      error: messageFromAgentError(error, regionId),
+      code: error.code,
+      upstreamStatus: error.upstreamStatus,
+      targetRegion: regionId,
+      targetAsset: asset,
+      agentBaseUrlHost: error.targetHost
+    };
+  }
+
+  return {
+    error: messageFromAgentError(error, regionId),
+    code: "VPN_AGENT_UNKNOWN_ERROR",
+    upstreamStatus: null,
+    targetRegion: regionId,
+    targetAsset: asset,
+    agentBaseUrlHost: null
+  };
 }
 
 export async function getVpnAssetResponse({
@@ -73,7 +102,8 @@ export async function getVpnAssetResponse({
         region,
         username: access.vpnUsername,
         asset
-      })
+      }),
+      { context: { region: region.id, asset } }
     );
 
     if (asset === "qr") {
@@ -94,7 +124,7 @@ export async function getVpnAssetResponse({
     });
   } catch (error) {
     return NextResponse.json(
-      { error: messageFromAgentError(error, region.id) },
+      diagnosticPayload(error, region.id, asset),
       { status: statusFromAgentError(error) }
     );
   }
